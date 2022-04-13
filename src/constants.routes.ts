@@ -1,0 +1,1 @@
+export const ROUTE_FORWARD_SLASH = "/"
