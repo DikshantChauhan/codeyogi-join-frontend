@@ -8,8 +8,6 @@ import { Institute } from "../Models/Institue";
 import { fetchInstitutesListAPI } from "../APIs/institute.api";
 import { discoverySoucresFetchAPI } from "../APIs/discoverySources.api";
 import { meUpdateAPI } from "../APIs/auth.api";
-import { addDoc, collection, getDocs } from "firebase/firestore";
-import { db } from "../../firebase-config";
 
 interface CompleteProfileProps {}
 
@@ -56,12 +54,13 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
     }),
     onSubmit: async (data) => {
       setIsLoading((loading) => !loading);
-      console.log(data);
+
       try {
         await meUpdateAPI(data);
       } catch (error) {
         console.error(error);
       }
+
       setIsLoading((loading) => !loading);
     },
   });

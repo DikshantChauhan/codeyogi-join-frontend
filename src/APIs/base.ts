@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export const CURRENT_BATCH = "/batches/1";
 export const REDIRECT_URL = "redirect_url";
 
