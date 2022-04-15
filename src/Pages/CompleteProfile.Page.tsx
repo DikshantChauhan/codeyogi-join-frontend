@@ -7,12 +7,16 @@ import FuzzySearch from "../Components/Form/FuzzySearch";
 import { Institute } from "../Models/Institue";
 import { fetchInstitutesListAPI } from "../APIs/institute.api";
 import { discoverySoucresFetchAPI } from "../APIs/discoverySources.api";
+import { meUpdateAPI } from "../APIs/auth.api";
+import { addDoc, collection, getDocs } from "firebase/firestore";
+import { db } from "../../firebase-config";
 
 interface CompleteProfileProps {}
 
 const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
   const [institutes, setInstitutes] = useState<Institute[]>([]);
   const [discoverySources, setDiscoverySources] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchInstitutesListAPI().then((institutes) => {
@@ -31,7 +35,8 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
     institute_name: string;
     city_of_residence: string;
     discovery_source: string;
-    meta: { institute: string | null; discoverySource: string | null } | null;
+    "meta.institute": string | null;
+    "meta.discoverySource": string | null;
   }>({
     initialValues: {
       email: "",
@@ -41,7 +46,8 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
       institute_name: "",
       city_of_residence: "",
       discovery_source: "",
-      meta: { institute: "", discoverySource: "" },
+      "meta.institute": "",
+      "meta.discoverySource": "",
     },
     validationSchema: yup.object().shape({
       email: yup.string().trim().email("Please enter a valid email").required(),
@@ -56,24 +62,28 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
       institute_name: yup.string().trim().required(),
       city_of_residence: yup.string().trim().required(),
       discovery_source: yup.string().trim().required(),
-      meta: yup.object().optional().shape({ institute: yup.string().trim().optional(), discoverySource: yup.string().trim().optional() }),
+      "meta.institute": yup.string().trim(),
+      "meta.discoverySource": yup.string().trim(),
     }),
-    onSubmit: (data) => {
+    onSubmit: async (data) => {
       const { institute_name, discovery_source, ...formData } = data;
-      formData.meta = { institute: "", discoverySource: "" };
+      formData["meta.institute"] = "";
+      formData["meta.discoverySource"] = "";
 
       const selectedInstitute = institutes.find((institute) => institute.name === institute_name);
       const discoverySourceExists = !!discoverySources.find((source) => source === discovery_source);
 
       const institute_id = selectedInstitute ? selectedInstitute.id : null;
-      formData.meta.institute = selectedInstitute ? null : institute_name;
+      formData["meta.institute"] = selectedInstitute ? null : institute_name;
 
       const source = discoverySourceExists ? discovery_source : null;
-      formData.meta.discoverySource = discoverySourceExists ? null : discovery_source;
-
-      if (!(formData.meta.discoverySource || formData.meta.institute)) formData.meta = null;
+      formData["meta.discoverySource"] = discoverySourceExists ? null : discovery_source;
 
       const profileData = { ...formData, institute_id, discovery_source: source };
+
+      setIsLoading((loading) => !loading);
+      await meUpdateAPI(profileData);
+      setIsLoading((loading) => !loading);
     },
   });
 
@@ -88,7 +98,6 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
   discoverySources.forEach((source) => {
     searchAbleSources = [...searchAbleSources, { name: source }];
   });
-
   return (
     <div className={`h-full md:pt-10`}>
       <div style={{ height: "fit-content" }} className="inset-0 w-3/4 m-auto lg:w-1/2 lg:absolute">
@@ -227,7 +236,7 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
                   </dd>
                 </div>
 
-                <SubmitButton isLoading={formik.isSubmitting} className="w-20 sm:w-32 sm:mb-10 sm:ml-5 ">
+                <SubmitButton isLoading={isLoading} className="w-20 sm:w-32 sm:mb-10 sm:ml-5 ">
                   Submit
                 </SubmitButton>
               </form>
