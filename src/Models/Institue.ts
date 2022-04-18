@@ -1,7 +1,6 @@
-export interface Institute {
-  id: number;
+import { Entity } from "./Entity";
+
+export interface Institute extends Entity {
   name: string;
   aliases: { alias: string[] };
-  created_at?: string;
-  updated_at?: string;
 }

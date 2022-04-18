@@ -1,7 +1,5 @@
 import { Field, FieldAttributes } from "formik";
 import React from "react";
-import { connect } from "react-redux";
-import { AppState } from "../../store/store";
 
 interface FromikSelectProps extends FieldAttributes<any> {
   options: string[];
@@ -32,8 +30,4 @@ const FromikSelect: React.FC<FromikSelectProps> = ({ options, error, touched, pl
   );
 };
 
-const mapStateToProps = (state: AppState) => ({});
-
-const mapDispatchToProps = {};
-
-export default React.memo(connect(mapStateToProps, mapDispatchToProps)(FromikSelect));
+export default React.memo(FromikSelect);

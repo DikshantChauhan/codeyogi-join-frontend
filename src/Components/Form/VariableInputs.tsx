@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { connect } from "react-redux";
-import { AppState } from "../../store/store";
+
 import Button from "../Button";
 import FormikField from "./FormikField";
 
@@ -14,7 +13,7 @@ interface VariableInputsProps {
   name: string;
   buttonText?: string;
   showButtons: boolean;
-  className?: string
+  className?: string;
 }
 
 const VariableInputs: React.FC<VariableInputsProps> = ({
@@ -91,8 +90,4 @@ const VariableInputs: React.FC<VariableInputsProps> = ({
   );
 };
 
-const mapStateToProps = (state: AppState) => ({});
-
-const mapDispatchToProps = {};
-
-export default React.memo(connect(mapStateToProps, mapDispatchToProps)(VariableInputs));
+export default React.memo(VariableInputs);

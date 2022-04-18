@@ -1,6 +1,6 @@
 import { FC, memo, useEffect, useMemo, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { ROUTE_FORWARD_SLASH, ROUTE_PROFILE, ROUTE_SIGN_IN, ROUTE_TESTS } from "./constants.routes";
+import { ROUTE_PROFILE, ROUTE_SIGN_IN, ROUTE_TESTS } from "./constants.routes";
 import SignInPage from "./Pages/SignIn.Page";
 import { authentication, db } from "../firebase-config";
 import { onAuthStateChanged } from "firebase/auth";

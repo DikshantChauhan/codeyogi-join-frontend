@@ -3,22 +3,19 @@ import { collection, DocumentData, DocumentReference, getDocs, limit, query, upd
 import { authentication, db } from "../../firebase-config";
 
 export interface MeUpdateRequest {
-  institute_id: number | null;
-  discovery_source: any;
   email: string;
   first_name: string;
   last_name: string;
   phone_number: number;
+  institute_name: string;
   city_of_residence: string;
-  "meta.institute": string | null;
-  "meta.discoverySource": string | null;
+  discovery_source: string;
 }
 
 export const meUpdateAPI = async (data: MeUpdateRequest) => {
-  const currentUser = getAuth().currentUser;
-  if (!currentUser) return;
-
-  const usersCollection = query(collection(db, "users"), where("uid", "==", currentUser.uid), limit(1));
+  // const currentUser = getAuth().currentUser;
+  // if (!currentUser) return;
+  const usersCollection = query(collection(db, "users"), where("uid", "==", "a6sd1ca6s5df165sd1f"), limit(1));
 
   const meDocs: DocumentReference<DocumentData>[] = [];
   (await getDocs(usersCollection)).forEach((doc) => meDocs.push(doc.ref));

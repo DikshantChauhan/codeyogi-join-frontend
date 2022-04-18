@@ -8,8 +8,6 @@ import { Institute } from "../Models/Institue";
 import { fetchInstitutesListAPI } from "../APIs/institute.api";
 import { discoverySoucresFetchAPI } from "../APIs/discoverySources.api";
 import { meUpdateAPI } from "../APIs/auth.api";
-import { addDoc, collection, getDocs } from "firebase/firestore";
-import { db } from "../../firebase-config";
 
 interface CompleteProfileProps {}
 
@@ -35,8 +33,6 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
     institute_name: string;
     city_of_residence: string;
     discovery_source: string;
-    "meta.institute": string | null;
-    "meta.discoverySource": string | null;
   }>({
     initialValues: {
       email: "",
@@ -46,43 +42,25 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
       institute_name: "",
       city_of_residence: "",
       discovery_source: "",
-      "meta.institute": "",
-      "meta.discoverySource": "",
     },
     validationSchema: yup.object().shape({
       email: yup.string().trim().email("Please enter a valid email").required(),
       first_name: yup.string().trim().required(),
       last_name: yup.string().trim().required(),
-      phone_number: yup
-        .string()
-        .required()
-        .matches(/^[0-9]+$/, "Must be only digits")
-        .min(10, "Must be exactly 10 digits")
-        .max(10, "Must be exactly 10 digits"),
+      phone_number: yup.number().required().lessThan(10000000000, "Must be exactly 10 digits").moreThan(999999999, "Must be exactly 10 digits"),
       institute_name: yup.string().trim().required(),
       city_of_residence: yup.string().trim().required(),
       discovery_source: yup.string().trim().required(),
-      "meta.institute": yup.string().trim(),
-      "meta.discoverySource": yup.string().trim(),
     }),
     onSubmit: async (data) => {
-      const { institute_name, discovery_source, ...formData } = data;
-      formData["meta.institute"] = "";
-      formData["meta.discoverySource"] = "";
-
-      const selectedInstitute = institutes.find((institute) => institute.name === institute_name);
-      const discoverySourceExists = !!discoverySources.find((source) => source === discovery_source);
-
-      const institute_id = selectedInstitute ? selectedInstitute.id : null;
-      formData["meta.institute"] = selectedInstitute ? null : institute_name;
-
-      const source = discoverySourceExists ? discovery_source : null;
-      formData["meta.discoverySource"] = discoverySourceExists ? null : discovery_source;
-
-      const profileData = { ...formData, institute_id, discovery_source: source };
-
       setIsLoading((loading) => !loading);
-      await meUpdateAPI(profileData);
+
+      try {
+        await meUpdateAPI(data);
+      } catch (error) {
+        console.error(error);
+      }
+
       setIsLoading((loading) => !loading);
     },
   });
@@ -168,7 +146,7 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
                   <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">
                     <Input
                       id="phone_number"
-                      type="text"
+                      type="number"
                       placeholder="Phone Number"
                       {...formik.getFieldProps("phone_number")}
                       touched={formik.touched.phone_number}

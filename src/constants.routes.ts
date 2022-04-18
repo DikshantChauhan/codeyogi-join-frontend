@@ -9,3 +9,4 @@ export const ROUTE_TEST = (testId?: number | string) => {
     return "/tests/:id";
   }
 };
+export const ROUTE_DEBUG = "/debug";
