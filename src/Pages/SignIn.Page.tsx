@@ -1,5 +1,6 @@
-import { FC, memo, useState } from "react";
-import { signIn, generateRecaptcha } from "../../firebase-config";
+import { FC, memo, useContext, useState } from "react";
+import { generateRecaptcha, signIn } from "../APIs/auth.api";
+import { userContext } from "../Contexts/user.Context";
 
 interface SignInPageProps {}
 
@@ -7,6 +8,7 @@ const SignInPage: FC<SignInPageProps> = () => {
   const [userPhoneNumber, setUserPhoneNumber] = useState("");
   const [isOTPSent, setIsOTPSent] = useState(false);
   const [OTP, setOTP] = useState("");
+  const user = useContext(userContext);
 
   const handleSendSMS = async (phoneNumber: number) => {
     if (isNaN(phoneNumber) || phoneNumber.toString().length !== 10) {
@@ -17,7 +19,7 @@ const SignInPage: FC<SignInPageProps> = () => {
       const confirmationResult = await signIn(`+91${phoneNumber}`, generateRecaptcha("recaptcha-container"));
       console.log("confirmationResult => ", confirmationResult);
       window.confirmationResult = confirmationResult;
-      setIsOTPSent(true)
+      setIsOTPSent(true);
       // SMS sent. Prompt user to type the code from the message, then sign the
       // user in with confirmationResult.confirm(code).
       // ...
