@@ -21,17 +21,15 @@ const App: FC<AppProps> = () => {
     onAuthStateChanged(authentication, async (me) => {
       if (me) {
         const q = query(collection(db, "users"), where("uid", "==", me.uid), limit(1));
-
         const docs = await getDocs(q);
         docs.forEach((doc) => {
           setUser(doc.data() as User);
-          !user && setIsUserFetching(false);
         });
       } else {
       }
+      setIsUserFetching(false);
     });
   }, []);
-  console.log(user);
 
   if (isUserFetching) {
     return <h1>Loading....</h1>;
