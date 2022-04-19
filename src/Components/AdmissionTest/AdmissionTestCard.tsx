@@ -3,6 +3,7 @@ import { FC, memo } from "react";
 import { AdmissionTestEntity } from "../../Models/AdmissionTest";
 import { secondsToHHMMSS } from "../../utils";
 import ListItemCard from "../ListItemCard";
+import ListItemCardButton from "../ListItemCardButton";
 
 interface AdmissionTestCardProps {
   admissionTest: AdmissionTestEntity;
@@ -15,11 +16,10 @@ const AdmissionTestCard: FC<AdmissionTestCardProps> = ({ admissionTest, classNam
       heading={admissionTest.name}
       subheading={"Duration: " + secondsToHHMMSS(admissionTest.duration)}
       date={DateTime.fromISO(admissionTest.start_date).toLocaleString(DateTime.DATETIME_MED)}
-      indicator={""}
-      indicatorLink={""}
-      details={admissionTest.instructions}
       className={className}
-    />
+    >
+      <ListItemCardButton type="button">Schedule</ListItemCardButton>
+    </ListItemCard>
   );
 };
 

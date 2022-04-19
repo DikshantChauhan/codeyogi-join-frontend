@@ -7,9 +7,9 @@ interface ListItemCardProps extends LiHTMLAttributes<HTMLLIElement> {
   heading: string;
   subheading: string;
   date: string;
-  indicator: string;
-  indicatorLink: string;
-  details: string;
+  indicator?: string;
+  indicatorLink?: string;
+  details?: string;
   markdown?: boolean;
   children?: ReactElement<ListItemCardButtonProps>[] | ReactElement<ListItemCardButtonProps>;
   className?: string;
@@ -33,23 +33,24 @@ export const ListItemCard: FC<ListItemCardProps> = ({
         <div className="flex-1">
           <div className="flex flex-col justify-between sm:items-center sm:flex-row">
             <div className={`mb-2 sm:mb-0`}>
-              <h3 className="font-medium text-gray-900 truncate">
+              <h3 className="flex flex-col text-sm font-medium text-gray-900 truncate sm:flex-row">
                 {heading} &nbsp; <span className="text-gray-500">{date}</span>
               </h3>
               <p className="mt-1 text-sm text-gray-500 truncate">{subheading}</p>
             </div>
-            {indicator && (
+            {indicator && indicatorLink && (
               <Link to={indicatorLink} className="p-1 px-2 text-sm font-semibold text-white bg-indigo-600 rounded-full max-w-max">
                 {indicator}
               </Link>
             )}
           </div>
 
-          {markdown ? (
-            <MDEditor.Markdown className={`flex-shrink-0 inline-block mt-3 p-1 py-2 text-sm font-medium`} source={details} />
-          ) : (
-            <div className={`flex-shrink-0 inline-block mt-3 p-1 py-2 text-sm font-medium`}>{details}</div>
-          )}
+          {details &&
+            (markdown ? (
+              <MDEditor.Markdown className={`flex-shrink-0 text-xs inline-block mt-3 p-1 py-2 sm:text-sm font-medium`} source={details} />
+            ) : (
+              <div className={`flex-shrink-0 inline-block text-xs mt-3 p-1 py-2 sm:text-sm font-medium`}>{details}</div>
+            ))}
         </div>
       </div>
 

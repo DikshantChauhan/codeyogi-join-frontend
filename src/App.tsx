@@ -11,6 +11,7 @@ const App: FC<AppProps> = () => {
   return (
     <Routes>
       <Route path={ROUTE_SIGN_IN} element={<SignInPage />} />
+
       <Route path={ROUTE_FORWARD_SLASH} element={<AppContainer />}>
         <Route path={ROUTE_DEBUG} element={<DebugPage />} />
       </Route>
