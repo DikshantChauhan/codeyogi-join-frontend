@@ -1,14 +1,17 @@
 import { FC, memo, useEffect, useMemo, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { ROUTE_DEBUG, ROUTE_PROFILE, ROUTE_SIGN_IN, ROUTE_TESTS } from "./constants.routes";
+import { ROUTE_DEBUG, ROUTE_PROFILE, ROUTE_LOGIN, ROUTE_SLOTS, ROUTE_FORWARD_SLASH } from "./constants.routes";
 import SignInPage from "./Pages/SignIn.Page";
-import { authentication, db } from "../firebase-config";
+import { authentication } from "../firebase-config";
 import { onAuthStateChanged } from "firebase/auth";
 import { userContext } from "./Contexts/user.Context";
 import { User } from "./Models/User";
-import { collection, getDocs, limit, query, where } from "firebase/firestore";
 import CompleteProfilePage from "./Pages/CompleteProfile.Page";
 import DebugPage from "./Pages/Debug.Page";
+import { meFetchAPI, signOut } from "./APIs/auth.api";
+import { isStudentProfileComplete } from "./utils";
+import NotFoundPage from "./Pages/NotFound.Page";
+import AdmissionTestsPage from "./Pages/AdmissionTests.Page";
 
 interface AppProps {}
 
@@ -18,41 +21,97 @@ const App: FC<AppProps> = () => {
   const [isUserFetching, setIsUserFetching] = useState(true);
 
   useEffect(() => {
-    onAuthStateChanged(authentication, async (me) => {
+    const unsub = onAuthStateChanged(authentication, async (me) => {
       if (me) {
-        const q = query(collection(db, "users"), where("uid", "==", me.uid), limit(1));
-        const docs = await getDocs(q);
-        docs.forEach((doc) => {
-          setUser(doc.data() as User);
-        });
+        setIsUserFetching(true);
+
+        setTimeout(async () => {
+          const user = await meFetchAPI(me.uid);
+
+          setUser(user as any);
+          setIsUserFetching(false);
+        }, 1500);
       } else {
+        setIsUserFetching(false);
       }
-      setIsUserFetching(false);
     });
+
+    return unsub;
   }, []);
 
   if (isUserFetching) {
-    return <h1>Loading....</h1>;
+    return (
+      <div>
+        <button
+          onClick={async () => {
+            await signOut();
+            setUser(null);
+          }}
+        >
+          Sign out
+        </button>
+        <h1>Loading....</h1>;
+      </div>
+    );
   }
+
+  const homepageMap = {
+    passed: <h1>you passed {":)"}</h1>,
+    failed: <h1>you failed {":)"}</h1>,
+    skipped: <h1>you skipped your exam</h1>,
+  };
 
   return (
     <userContext.Provider value={value}>
+      <div>
+        <button
+          onClick={async () => {
+            await signOut();
+            setUser(null);
+            window.location.href = ROUTE_LOGIN;
+          }}
+        >
+          Sign out
+        </button>
+      </div>
+
       <Routes>
+        <Route
+          path={ROUTE_FORWARD_SLASH}
+          element={
+            user ? (
+              isStudentProfileComplete(user) ? (
+                user.selected_exam_id !== undefined ? (
+                  user.status ? (
+                    homepageMap[user.status]
+                  ) : (
+                    <h1>countdown</h1>
+                  )
+                ) : (
+                  <Navigate to={ROUTE_SLOTS} />
+                )
+              ) : (
+                <Navigate to={ROUTE_PROFILE} />
+              )
+            ) : (
+              <Navigate to={ROUTE_LOGIN} />
+            )
+          }
+        />
+
+        <Route path={ROUTE_LOGIN} element={user ? <Navigate to={ROUTE_FORWARD_SLASH} /> : <SignInPage />} />
+
         {user && (
           <>
-            <Route path={ROUTE_PROFILE} element={true ? <Navigate to={ROUTE_TESTS}></Navigate> : <CompleteProfilePage />} />
-            <Route path={ROUTE_TESTS} element={<h1>Tests page</h1>} />
-          </>
-        )}
-        {!user && (
-          <>
-            <Route path={ROUTE_SIGN_IN} element={<SignInPage />} />
+            <Route path={ROUTE_PROFILE} element={isStudentProfileComplete(user) ? <Navigate to={ROUTE_FORWARD_SLASH} /> : <CompleteProfilePage />} />
+
+            <Route path={ROUTE_SLOTS} element={user.selected_exam_id ? <Navigate to={ROUTE_FORWARD_SLASH} /> : <AdmissionTestsPage />} />
           </>
         )}
 
         <Route path={ROUTE_DEBUG} element={<DebugPage />} />
 
-        <Route path="*" element={<Navigate to={user ? ROUTE_PROFILE : ROUTE_SIGN_IN}></Navigate>}></Route>
+        <Route path="*" element={user ? <NotFoundPage /> : <Navigate to={ROUTE_FORWARD_SLASH}></Navigate>} />
       </Routes>
     </userContext.Provider>
   );

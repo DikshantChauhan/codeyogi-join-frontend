@@ -1,30 +1,51 @@
-import { ApplicationVerifier, getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
-import { collection, DocumentData, DocumentReference, getDocs, limit, query, updateDoc, where } from "firebase/firestore";
+import { ApplicationVerifier, getAuth, RecaptchaVerifier, signInWithPhoneNumber, signOut as firebaseSignout } from "firebase/auth";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { authentication, db } from "../../firebase-config";
+import { User } from "../Models/User";
 
 export interface MeUpdateRequest {
   email: string;
   first_name: string;
   last_name: string;
-  phone_number: number;
+  phone_no: number;
   institute_name: string;
   city_of_residence: string;
   discovery_source: string;
 }
 
+const auth = getAuth();
+
+export const meFetchAPI = async (id: string) => {
+  const meDocRef = doc(db, "users", id);
+  const meDoc = await getDoc(meDocRef);
+  const meData = meDoc.data() as User | undefined;
+
+  if (!meData) return undefined;
+
+  const phone_no = meData.phone_no.replace("+91", "");
+
+  return { ...meData, phone_no };
+};
+
 export const meUpdateAPI = async (data: MeUpdateRequest) => {
-  // const currentUser = getAuth().currentUser;
-  // if (!currentUser) return;
-  const usersCollection = query(collection(db, "users"), where("uid", "==", "a6sd1ca6s5df165sd1f"), limit(1));
+  const currentUser = auth.currentUser;
+  if (!currentUser) return;
 
-  const meDocs: DocumentReference<DocumentData>[] = [];
-  (await getDocs(usersCollection)).forEach((doc) => meDocs.push(doc.ref));
+  const meDocRef = doc(db, "users", currentUser.uid);
 
-  await updateDoc(meDocs[0], data as any);
+  await updateDoc(meDocRef, data as any);
+
+  const meDoc = await getDoc(meDocRef);
+
+  return meDoc.data();
 };
 
 export const signIn = (phoneNumber: string, appVerifier: ApplicationVerifier) => {
   return signInWithPhoneNumber(authentication, phoneNumber, appVerifier);
+};
+
+export const signOut = () => {
+  return firebaseSignout(auth);
 };
 
 export const generateRecaptcha = (containerOrId: string | HTMLElement, success?: (response: any) => void) => {

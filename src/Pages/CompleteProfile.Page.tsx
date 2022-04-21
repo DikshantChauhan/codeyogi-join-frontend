@@ -1,5 +1,5 @@
 import { useFormik } from "formik";
-import { FC, memo, useEffect, useState } from "react";
+import { FC, memo, useContext, useEffect, useState } from "react";
 import Input from "../Components/Form/Input";
 import SubmitButton from "../Components/SubmitButton";
 import * as yup from "yup";
@@ -8,6 +8,7 @@ import { Institute } from "../Models/Institue";
 import { fetchInstitutesListAPI } from "../APIs/institute.api";
 import { discoverySoucresFetchAPI } from "../APIs/discoverySources.api";
 import { meUpdateAPI } from "../APIs/auth.api";
+import { userContext } from "../Contexts/user.Context";
 
 interface CompleteProfileProps {}
 
@@ -15,6 +16,7 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
   const [institutes, setInstitutes] = useState<Institute[]>([]);
   const [discoverySources, setDiscoverySources] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const user = useContext(userContext);
 
   useEffect(() => {
     fetchInstitutesListAPI().then((institutes) => {
@@ -29,7 +31,7 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
     email: string;
     first_name: string;
     last_name: string;
-    phone_number: number;
+    phone_no: number;
     institute_name: string;
     city_of_residence: string;
     discovery_source: string;
@@ -38,7 +40,7 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
       email: "",
       first_name: "",
       last_name: "",
-      phone_number: 0,
+      phone_no: user.user ? user.user.phone_no : 0,
       institute_name: "",
       city_of_residence: "",
       discovery_source: "",
@@ -47,7 +49,7 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
       email: yup.string().trim().email("Please enter a valid email").required(),
       first_name: yup.string().trim().required(),
       last_name: yup.string().trim().required(),
-      phone_number: yup.number().required().lessThan(10000000000, "Must be exactly 10 digits").moreThan(999999999, "Must be exactly 10 digits"),
+      phone_no: yup.number().required().lessThan(10000000000, "Must be exactly 10 digits").moreThan(999999999, "Must be exactly 10 digits"),
       institute_name: yup.string().trim().required(),
       city_of_residence: yup.string().trim().required(),
       discovery_source: yup.string().trim().required(),
@@ -64,7 +66,7 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
       setIsLoading((loading) => !loading);
     },
   });
-
+  console.log(user);
   const setFormikInstituteName = async (institute_name: string) => {
     await formik.setValues({ ...formik.values, institute_name });
   };
@@ -145,13 +147,13 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
 
                   <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">
                     <Input
-                      id="phone_number"
+                      id="phone_no"
                       type="number"
                       placeholder="Phone Number"
-                      {...formik.getFieldProps("phone_number")}
-                      touched={formik.touched.phone_number}
-                      error={formik.errors.phone_number}
-                      value={formik.values.phone_number}
+                      {...formik.getFieldProps("phone_no")}
+                      touched={formik.touched.phone_no}
+                      error={formik.errors.phone_no}
+                      value={formik.values.phone_no}
                       className="mb-2"
                     />
                   </dd>

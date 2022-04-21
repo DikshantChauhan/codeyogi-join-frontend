@@ -1,16 +1,18 @@
-import { FC, memo, useContext, useState } from "react";
+import { FC, memo, useState } from "react";
 import { generateRecaptcha, signIn } from "../APIs/auth.api";
-import { userContext } from "../Contexts/user.Context";
 import Input from "../Components/Form/Input";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import SubmitButton from "../Components/SubmitButton";
+import Logo from "../Components/Logo";
+import { ROUTE_FORWARD_SLASH } from "../constants.routes";
 
 interface SignInPageProps {}
 
 const SignInPage: FC<SignInPageProps> = () => {
   const [isOTPSent, setIsOTPSent] = useState(false);
-  const user = useContext(userContext);
+  const [isOTPSending, setIsOTPSending] = useState(false);
+  const [isOTPSubmitting, setIsOTPSubmitting] = useState(false);
 
   const handleSendSMS = async (phoneNumber?: string) => {
     if (!phoneNumber) {
@@ -23,34 +25,34 @@ const SignInPage: FC<SignInPageProps> = () => {
       return;
     }
 
-    try {
-      const confirmationResult = await signIn(`+91${phoneNumber}`, generateRecaptcha("recaptcha-container"));
+    setIsOTPSending(true);
 
+    try {
+      const confirmationResult = await signIn(`+911111111111`, generateRecaptcha("recaptcha-container"));
+      // const confirmationResult = await signIn(`+91${phoneNumber}`, generateRecaptcha("recaptcha-container"));
       window.confirmationResult = confirmationResult;
+
       setIsOTPSent(true);
-      // SMS sent. Prompt user to type the code from the message, then sign the
-      // user in with confirmationResult.confirm(code).
-      // ...
     } catch (error) {
       console.log("error => ", error);
+
       setIsOTPSent(false);
       formik.setErrors({ ...formik.errors, phoneNumber: "OTP not sent, either retry or try after some time!" });
-      // Error; SMS not sent
-      // ...
     }
+
+    setIsOTPSending(false);
   };
 
   const handleOTP = async (OTP: string) => {
+    setIsOTPSubmitting(true);
     try {
-      const result = await window.confirmationResult.confirm(OTP);
-      // User signed in successfully.
-      //const user = result.user;
-      //....
+      await window.confirmationResult.confirm("123456");
+      window.location.href = ROUTE_FORWARD_SLASH;
+      // const result = await window.confirmationResult.confirm(OTP);
     } catch (error) {
       formik.setErrors({ ...formik.errors, OTP: "OTP is not valid!" });
-      // User couldn't sign in (bad verification code?)
-      // ...
     }
+    setIsOTPSubmitting(false);
   };
 
   const formik = useFormik<{
@@ -85,20 +87,22 @@ const SignInPage: FC<SignInPageProps> = () => {
 
   return (
     <div className="mx-2">
-      <form onSubmit={formik.handleSubmit}>
-        <div className="flex flex-col items-center justify-center min-h-screen max-w-sm mx-auto">
-          {!isOTPSent && (
-            <Input
-              id="phoneNumber"
-              type="number"
-              placeholder="Phone Number"
-              {...formik.getFieldProps("phoneNumber")}
-              touched={formik.touched.phoneNumber}
-              error={formik.errors.phoneNumber}
-              value={formik.values.phoneNumber}
-              className="mb-10 w-full"
-            />
-          )}
+      <div className="flex flex-col items-center justify-center max-w-sm min-h-screen mx-auto">
+        <Logo type="CodeYogiLogoEnglishBlack" size="3xl" />
+
+        <form onSubmit={formik.handleSubmit} className={`mt-10 w-full`}>
+          <Input
+            id="phoneNumber"
+            type="number"
+            placeholder="Phone Number"
+            {...formik.getFieldProps("phoneNumber")}
+            touched={formik.touched.phoneNumber}
+            error={formik.errors.phoneNumber}
+            value={formik.values.phoneNumber}
+            className="w-full mb-10"
+            disabled={isOTPSent ? true : false}
+          />
+
           {isOTPSent && (
             <Input
               id="OTP"
@@ -108,12 +112,15 @@ const SignInPage: FC<SignInPageProps> = () => {
               touched={formik.touched.OTP}
               error={formik.errors.OTP}
               value={formik.values.OTP}
-              className="mb-10 w-full"
+              className="w-full mb-10"
             />
           )}
-          <SubmitButton>{isOTPSent ? "Submit OTP" : "Get OTP"}</SubmitButton>
-        </div>
-      </form>
+
+          <SubmitButton className={`w-32`} isLoading={isOTPSending || isOTPSubmitting}>
+            {isOTPSent ? "Submit OTP" : "Get OTP"}
+          </SubmitButton>
+        </form>
+      </div>
       <div id="recaptcha-container"></div> {/* This div is required with this ID, otherwise generateRecaptcha will throw error */}
     </div>
   );
