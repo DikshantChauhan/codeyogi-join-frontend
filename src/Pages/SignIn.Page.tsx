@@ -6,6 +6,7 @@ import * as yup from "yup";
 import SubmitButton from "../Components/SubmitButton";
 import Logo from "../Components/Logo";
 import { ROUTE_FORWARD_SLASH } from "../constants.routes";
+import { useNavigate } from "react-router";
 
 interface SignInPageProps {}
 
@@ -13,6 +14,7 @@ const SignInPage: FC<SignInPageProps> = () => {
   const [isOTPSent, setIsOTPSent] = useState(false);
   const [isOTPSending, setIsOTPSending] = useState(false);
   const [isOTPSubmitting, setIsOTPSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const handleSendSMS = async (phoneNumber?: string) => {
     if (!phoneNumber) {
@@ -47,7 +49,7 @@ const SignInPage: FC<SignInPageProps> = () => {
     setIsOTPSubmitting(true);
     try {
       await window.confirmationResult.confirm("123456");
-      window.location.href = ROUTE_FORWARD_SLASH;
+      navigate(ROUTE_FORWARD_SLASH);
       // const result = await window.confirmationResult.confirm(OTP);
     } catch (error) {
       formik.setErrors({ ...formik.errors, OTP: "OTP is not valid!" });

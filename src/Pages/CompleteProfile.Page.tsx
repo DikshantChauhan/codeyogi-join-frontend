@@ -8,7 +8,7 @@ import { Institute } from "../Models/Institue";
 import { fetchInstitutesListAPI } from "../APIs/institute.api";
 import { discoverySoucresFetchAPI } from "../APIs/discoverySources.api";
 import { meUpdateAPI } from "../APIs/auth.api";
-import { userContext } from "../Contexts/user.Context";
+import { userContext } from "../Contexts/user.contextt";
 
 interface CompleteProfileProps {}
 

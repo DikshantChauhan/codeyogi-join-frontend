@@ -1,7 +1,7 @@
 import { User as FirebaseUser } from "@firebase/auth";
-import { onSnapshot, Unsubscribe, DocumentData, collection, query, where, QuerySnapshot, limit } from "firebase/firestore";
-import { db } from "../firebase-config";
+import { Unsubscribe, DocumentData, QuerySnapshot } from "firebase/firestore";
 import { meFetchAPI } from "./APIs/auth.api";
+import { ROUTE_PROFILE, ROUTE_SLOTS, ROUTE_FORWARD_SLASH, ROUTE_LOGIN } from "./constants.routes";
 import { User } from "./Models/User";
 
 const studentProfileFields = ["city_of_residence", "discovery_source", "email", "first_name", "last_name", "institute_name", "phone_no"];
@@ -25,7 +25,7 @@ export let unsubMeObserver: Unsubscribe | undefined;
 
 export const handleAuthChanges = async (
   me: FirebaseUser | null,
-  setUser: React.Dispatch<React.SetStateAction<User | null>>,
+  setUser: (user: User | null) => void,
   setIsUserFetching: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
   if (me) {
@@ -42,10 +42,40 @@ export const handleAuthChanges = async (
   }
 };
 
-export const handleMeChanges = (doc: QuerySnapshot<DocumentData>) => {
+export const handleAllowedRoutes = (user: User | null, currentAllowedRoutes: string[], setAllowedRoutes: (routes: string[]) => void) => {
+  const newAllowedRoutes = [];
+
+  if (user === null) {
+    newAllowedRoutes.push(ROUTE_LOGIN);
+  } else if (!isStudentProfileComplete(user)) {
+    newAllowedRoutes.push(ROUTE_PROFILE);
+  } else if (!user.selected_exam_id) {
+    newAllowedRoutes.push(ROUTE_SLOTS);
+  } else if (user.status === "skipped") {
+    newAllowedRoutes.push(ROUTE_FORWARD_SLASH);
+    newAllowedRoutes.push(ROUTE_SLOTS);
+  } else if (user.status) {
+    newAllowedRoutes.push(ROUTE_FORWARD_SLASH);
+  }
+
+  const check = newAllowedRoutes.sort().toString() === currentAllowedRoutes.sort().toString();
+
+  if (!check) {
+    setAllowedRoutes(newAllowedRoutes);
+  }
+};
+
+export const handleMeChanges = (
+  doc: QuerySnapshot<DocumentData>,
+  user: User | null,
+  currentAllowedRoutes: string[],
+  setAllowedRoutes: (routes: string[]) => void
+) => {
   doc.docChanges().forEach((change) => {
     if (change.type === "modified") {
       console.log("Modified ", change.doc.data());
     }
   });
+
+  handleAllowedRoutes(user, currentAllowedRoutes, setAllowedRoutes);
 };

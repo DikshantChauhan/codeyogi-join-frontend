@@ -1,12 +1,12 @@
 import { createContext } from "react";
 import { User } from "../Models/User";
 
-const defaultUserContext: {
+export const defaultUserContext: {
   user: null | User;
-  setUser: (user: User) => void;
+  setUser: (user: User | null) => void;
 } = {
   user: null,
-  setUser: (user: User) => {
+  setUser: (user: User | null) => {
     defaultUserContext.user = user;
   },
 };
