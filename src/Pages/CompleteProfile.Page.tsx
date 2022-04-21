@@ -16,7 +16,9 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
   const [institutes, setInstitutes] = useState<Institute[]>([]);
   const [discoverySources, setDiscoverySources] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const user = useContext(userContext);
+  const { user, setUser } = useContext(userContext);
+
+  if (!user) return <></>;
 
   useEffect(() => {
     fetchInstitutesListAPI().then((institutes) => {
@@ -37,13 +39,13 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
     discovery_source: string;
   }>({
     initialValues: {
-      email: "",
-      first_name: "",
-      last_name: "",
-      phone_no: user.user ? user.user.phone_no : 0,
-      institute_name: "",
-      city_of_residence: "",
-      discovery_source: "",
+      email: user.email || "",
+      first_name: user.first_name || "",
+      last_name: user.last_name || "",
+      phone_no: +user.phone_no,
+      institute_name: user.institute_name || "",
+      city_of_residence: user.city_of_residence || "",
+      discovery_source: user.discovery_source || "",
     },
     validationSchema: yup.object().shape({
       email: yup.string().trim().email("Please enter a valid email").required(),
@@ -58,7 +60,10 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
       setIsLoading((loading) => !loading);
 
       try {
-        await meUpdateAPI(data);
+        const updatedUser = await meUpdateAPI(data);
+        {
+          updatedUser && setUser(updatedUser);
+        }
       } catch (error) {
         console.error(error);
       }
@@ -66,7 +71,7 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
       setIsLoading((loading) => !loading);
     },
   });
-  console.log(user);
+
   const setFormikInstituteName = async (institute_name: string) => {
     await formik.setValues({ ...formik.values, institute_name });
   };
@@ -78,6 +83,7 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
   discoverySources.forEach((source) => {
     searchAbleSources = [...searchAbleSources, { name: source }];
   });
+
   return (
     <div className={`h-full md:pt-10`}>
       <div style={{ height: "fit-content" }} className="inset-0 w-3/4 m-auto lg:w-1/2 lg:absolute">

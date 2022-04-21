@@ -22,9 +22,13 @@ export const meFetchAPI = async (id: string) => {
 
   if (!meData) return undefined;
 
-  const phone_no = meData.phone_no.replace("+91", "");
+  if (typeof meData.phone_no === "string") {
+    const phone_no = meData.phone_no.replace("+91", "");
 
-  return { ...meData, phone_no };
+    return { ...meData, phone_no };
+  }
+
+  return meData;
 };
 
 export const meUpdateAPI = async (data: MeUpdateRequest) => {
@@ -37,7 +41,7 @@ export const meUpdateAPI = async (data: MeUpdateRequest) => {
 
   const meDoc = await getDoc(meDocRef);
 
-  return meDoc.data();
+  return meDoc.data() as User | undefined;
 };
 
 export const signIn = (phoneNumber: string, appVerifier: ApplicationVerifier) => {
