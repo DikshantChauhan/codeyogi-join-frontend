@@ -30,8 +30,7 @@ const SignInPage: FC<SignInPageProps> = () => {
     setIsOTPSending(true);
 
     try {
-      const confirmationResult = await signIn(`+911111111111`, generateRecaptcha("recaptcha-container"));
-      // const confirmationResult = await signIn(`+91${phoneNumber}`, generateRecaptcha("recaptcha-container"));
+      const confirmationResult = await signIn(`+91${phoneNumber}`, generateRecaptcha("recaptcha-container"));
       window.confirmationResult = confirmationResult;
 
       setIsOTPSent(true);
@@ -48,9 +47,8 @@ const SignInPage: FC<SignInPageProps> = () => {
   const handleOTP = async (OTP: string) => {
     setIsOTPSubmitting(true);
     try {
-      await window.confirmationResult.confirm("123456");
+      await window.confirmationResult.confirm(OTP);
       navigate(ROUTE_FORWARD_SLASH);
-      // const result = await window.confirmationResult.confirm(OTP);
     } catch (error) {
       formik.setErrors({ ...formik.errors, OTP: "OTP is not valid!" });
     }
@@ -69,7 +67,7 @@ const SignInPage: FC<SignInPageProps> = () => {
       phoneNumber: yup
         .string()
         .required("Enter your Phone number")
-        .matches(/^[6-9]\d{9}$/, { message: "Invalid Phone number" }),
+        .matches(/^[0-9]\d{9}$/, { message: "Invalid Phone number" }),
       OTP: yup.string().optional(),
     }),
     onSubmit: async (data) => {

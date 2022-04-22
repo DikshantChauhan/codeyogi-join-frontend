@@ -15,6 +15,7 @@ export interface MeUpdateRequest {
 
 export const meFetchAPI = async (id: string) => {
   const meDocRef = doc(db, "users", id);
+  console.log(id);
   const meDoc = await getDoc(meDocRef);
   const meData = meDoc.data() as User | undefined;
 

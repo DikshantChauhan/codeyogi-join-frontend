@@ -7,7 +7,8 @@ import { User } from "./Models/User";
 
 const studentProfileFields = ["city_of_residence", "discovery_source", "email", "first_name", "last_name", "institute_name", "phone_no"];
 
-export const isStudentProfileComplete = (user: User) => {
+export const isStudentProfileComplete = (user: User | null) => {
+  if (!user) return false;
   return studentProfileFields.every((field) => !!user[field as keyof User]);
 };
 
@@ -43,18 +44,15 @@ export const handleAuthChanges = async (
   }
 };
 
-export const handleAllowedRoutes = (
-  user: User | null,
-  currentAllowedRoutes: string[],
-  setAllowedRoutes: (routes: string[]) => void,
-  navigate: NavigateFunction
-) => {
+export const handleAllowedRoutes = (user: User | null, currentAllowedRoutes: string[], setAllowedRoutes: (routes: string[]) => void) => {
   const newAllowedRoutes = [];
   const currentRoute = window.location.pathname;
 
   if (user === null) {
     newAllowedRoutes.push(ROUTE_LOGIN);
-    navigate("/login");
+    if (currentRoute !== ROUTE_LOGIN) {
+      window.location.href = ROUTE_LOGIN;
+    }
   } else if (!isStudentProfileComplete(user)) {
     newAllowedRoutes.push(ROUTE_PROFILE);
   } else if (!user.selected_exam_id) {
@@ -69,8 +67,8 @@ export const handleAllowedRoutes = (
   const check = newAllowedRoutes.sort().toString() === currentAllowedRoutes.sort().toString();
 
   if (!check) {
-    if (currentRoute === ROUTE_FORWARD_SLASH) navigate(newAllowedRoutes[0]);
-    if (currentRoute === ROUTE_LOGIN && user) navigate(newAllowedRoutes[0]);
+    if (currentRoute === ROUTE_FORWARD_SLASH) window.location.href = newAllowedRoutes[0];
+    if (currentRoute === ROUTE_LOGIN && user) window.location.href = newAllowedRoutes[0];
 
     setAllowedRoutes(newAllowedRoutes);
   }
@@ -81,8 +79,7 @@ export const handleMeChanges = (
   setUser: (user: User | null) => void,
   user: User | null,
   currentAllowedRoutes: string[],
-  setAllowedRoutes: (routes: string[]) => void,
-  navigate: NavigateFunction
+  setAllowedRoutes: (routes: string[]) => void
 ) => {
   doc.docChanges().forEach((change) => {
     if (change.type === "modified") {
@@ -90,5 +87,5 @@ export const handleMeChanges = (
     }
   });
 
-  handleAllowedRoutes(user, currentAllowedRoutes, setAllowedRoutes, navigate);
+  handleAllowedRoutes(user, currentAllowedRoutes, setAllowedRoutes);
 };
