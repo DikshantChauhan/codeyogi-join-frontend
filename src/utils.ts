@@ -78,6 +78,7 @@ export const handleAllowedRoutes = (
 
 export const handleMeChanges = (
   doc: QuerySnapshot<DocumentData>,
+  setUser: (user: User | null) => void,
   user: User | null,
   currentAllowedRoutes: string[],
   setAllowedRoutes: (routes: string[]) => void,
@@ -85,7 +86,7 @@ export const handleMeChanges = (
 ) => {
   doc.docChanges().forEach((change) => {
     if (change.type === "modified") {
-      console.log("Modified ", change.doc.data());
+      setUser(change.doc.data() as User);
     }
   });
 

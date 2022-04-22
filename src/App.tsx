@@ -2,9 +2,8 @@ import { FC, memo, useContext, useEffect, useMemo, useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { ROUTE_DEBUG, ROUTE_PROFILE, ROUTE_LOGIN, ROUTE_SLOTS, ROUTE_FORWARD_SLASH, ROUTE_HOMEPAGE } from "./constants.routes";
 import SignInPage from "./Pages/SignIn.Page";
-import { authentication, db } from "../firebase-config";
+import { authentication, db, functions } from "../firebase-config";
 import { onAuthStateChanged } from "firebase/auth";
-import { User } from "./Models/User";
 import CompleteProfilePage from "./Pages/CompleteProfile.Page";
 import DebugPage from "./Pages/Debug.Page";
 import { signOut } from "./APIs/auth.api";
@@ -16,6 +15,9 @@ import NotFoundPage from "./Pages/NotFound.Page";
 import { userContext } from "./Contexts/user.contextt";
 import { allowedRoutesContext } from "./Contexts/allowedRoutes.context";
 import AppContextProvider from "./Components/AppContext.Provider";
+import { test } from "./APIs/cloudFunctions.api";
+import Button from "./Components/Button";
+import { httpsCallable } from "firebase/functions";
 
 interface AppProps {}
 
@@ -38,7 +40,7 @@ const App: FC<AppProps> = () => {
       const meQuery = query(collection(db, "users"), where("phone_no", "==", user.phone_no), limit(1));
 
       const unsubMeObserver = onSnapshot(meQuery, (doc) => {
-        handleMeChanges(doc, user, allowedRoutes, setAllowedRoutes, navigate);
+        handleMeChanges(doc, setUser, user, allowedRoutes, setAllowedRoutes, navigate);
       });
 
       return unsubMeObserver;
@@ -79,6 +81,21 @@ const App: FC<AppProps> = () => {
         >
           Sign out
         </button>
+
+        <Button
+          onClick={async () => {
+            const sayHello = httpsCallable(functions, "scheduleTest");
+            sayHello({ id: 1 })
+              .then((result) => {
+                console.log(result.data);
+              })
+              .catch((error) => {
+                console.error(error);
+              });
+          }}
+        >
+          test
+        </Button>
       </div>
 
       <Routes>

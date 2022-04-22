@@ -1,4 +1,5 @@
 import { FC, memo } from "react";
+import { FaSpinner } from "react-icons/fa";
 import { IconType } from "react-icons/lib";
 import { Link } from "react-router-dom";
 
@@ -10,9 +11,10 @@ export interface ListItemCardButtonProps {
   className?: string;
   iconClassName?: string;
   to?: string;
+  isLoading?: boolean;
 }
 
-const ListItemCardButton: FC<ListItemCardButtonProps> = ({ type, children, onClick, Icon, className, iconClassName, to }) => {
+const ListItemCardButton: FC<ListItemCardButtonProps> = ({ type, children, onClick, Icon, className, iconClassName, to, isLoading }) => {
   return (
     <div className="flex flex-1 px-2 sm:px-8">
       {type === "link" ? (
@@ -31,7 +33,7 @@ const ListItemCardButton: FC<ListItemCardButtonProps> = ({ type, children, onCli
         >
           {Icon && <Icon className={`w-4 h-4 sm:w-6 sm:h-6  ${iconClassName}`} aria-hidden="true" />}
 
-          <span className="ml-1 sm:ml-3">{children}</span>
+          <span className="ml-1 sm:ml-3">{isLoading ? <FaSpinner className={`animate-spin text-black w-5 h-5 mx-auto`} /> : children}</span>
         </button>
       )}
     </div>

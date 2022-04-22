@@ -1,4 +1,4 @@
-import { ApplicationVerifier, getAuth, RecaptchaVerifier, signInWithPhoneNumber, signOut as firebaseSignout } from "firebase/auth";
+import { ApplicationVerifier, RecaptchaVerifier, signInWithPhoneNumber, signOut as firebaseSignout } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { authentication, db } from "../../firebase-config";
 import { User } from "../Models/User";
@@ -12,8 +12,6 @@ export interface MeUpdateRequest {
   city_of_residence: string;
   discovery_source: string;
 }
-
-const auth = getAuth();
 
 export const meFetchAPI = async (id: string) => {
   const meDocRef = doc(db, "users", id);
@@ -32,7 +30,7 @@ export const meFetchAPI = async (id: string) => {
 };
 
 export const meUpdateAPI = async (data: MeUpdateRequest) => {
-  const currentUser = auth.currentUser;
+  const currentUser = authentication.currentUser;
   if (!currentUser) return;
 
   const meDocRef = doc(db, "users", currentUser.uid);
@@ -49,7 +47,7 @@ export const signIn = (phoneNumber: string, appVerifier: ApplicationVerifier) =>
 };
 
 export const signOut = () => {
-  return firebaseSignout(auth);
+  return firebaseSignout(authentication);
 };
 
 export const generateRecaptcha = (containerOrId: string | HTMLElement, success?: (response: any) => void) => {
