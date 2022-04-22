@@ -1,12 +1,12 @@
 import { FC, memo } from "react";
-import AdmissionTestsPage from "./AdmissionTests.Page";
+import ExamsPage from "./Exams.Page";
 
 interface DebugProps {}
 
 const Debug: FC<DebugProps> = ({}) => {
   return (
     <div>
-      <AdmissionTestsPage />
+      <ExamsPage />
     </div>
   );
 };

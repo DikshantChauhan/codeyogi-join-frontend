@@ -1,6 +1,7 @@
 import { User as FirebaseUser } from "@firebase/auth";
-import { Unsubscribe, DocumentData, QuerySnapshot } from "firebase/firestore";
+import { Unsubscribe, DocumentData, QuerySnapshot, doc } from "firebase/firestore";
 import { NavigateFunction } from "react-router-dom";
+import { authentication, db } from "../firebase-config";
 import { meFetchAPI } from "./APIs/auth.api";
 import { ROUTE_PROFILE, ROUTE_SLOTS, ROUTE_FORWARD_SLASH, ROUTE_LOGIN, ROUTE_HOMEPAGE } from "./constants.routes";
 import { User } from "./Models/User";
@@ -34,7 +35,7 @@ export const handleAuthChanges = async (
     setIsUserFetching(true);
 
     setTimeout(async () => {
-      const user = await meFetchAPI(me.uid);
+      const user = await meFetchAPI();
 
       setUser(user as any);
       setIsUserFetching(false);
@@ -50,9 +51,6 @@ export const handleAllowedRoutes = (user: User | null, currentAllowedRoutes: str
 
   if (user === null) {
     newAllowedRoutes.push(ROUTE_LOGIN);
-    if (currentRoute !== ROUTE_LOGIN) {
-      window.location.href = ROUTE_LOGIN;
-    }
   } else if (!isStudentProfileComplete(user)) {
     newAllowedRoutes.push(ROUTE_PROFILE);
   } else if (!user.selected_exam_id) {
@@ -67,25 +65,40 @@ export const handleAllowedRoutes = (user: User | null, currentAllowedRoutes: str
   const check = newAllowedRoutes.sort().toString() === currentAllowedRoutes.sort().toString();
 
   if (!check) {
+    setAllowedRoutes(newAllowedRoutes);
+
     if (currentRoute === ROUTE_FORWARD_SLASH) window.location.href = newAllowedRoutes[0];
     if (currentRoute === ROUTE_LOGIN && user) window.location.href = newAllowedRoutes[0];
-
-    setAllowedRoutes(newAllowedRoutes);
+    if (currentRoute !== newAllowedRoutes[0]) window.location.href = newAllowedRoutes[0];
   }
 };
 
 export const handleMeChanges = (
   doc: QuerySnapshot<DocumentData>,
   setUser: (user: User | null) => void,
-  user: User | null,
   currentAllowedRoutes: string[],
   setAllowedRoutes: (routes: string[]) => void
 ) => {
-  doc.docChanges().forEach((change) => {
-    if (change.type === "modified") {
-      setUser(change.doc.data() as User);
-    }
-  });
+  setTimeout(() => {
+    let changedUser: User | null = null;
+    doc.docChanges().forEach((change) => {
+      if (change.type === "modified") {
+        changedUser = change.doc.data() as User | null;
+        setUser(changedUser as User);
+      }
+    });
 
-  handleAllowedRoutes(user, currentAllowedRoutes, setAllowedRoutes);
+    if (changedUser) {
+      handleAllowedRoutes(changedUser, currentAllowedRoutes, setAllowedRoutes);
+    }
+  }, 1500);
+};
+
+export const getMeDocRef = () => {
+  const currentUser = authentication.currentUser;
+  if (!currentUser) return;
+
+  const meDocRef = doc(db, "users", currentUser.uid);
+
+  return meDocRef;
 };

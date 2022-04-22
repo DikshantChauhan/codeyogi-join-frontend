@@ -61,8 +61,8 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
 
       try {
         const updatedUser = await meUpdateAPI(data);
-        {
-          updatedUser && setUser(updatedUser);
+        if (updatedUser) {
+          setUser(updatedUser);
         }
       } catch (error) {
         console.error(error);

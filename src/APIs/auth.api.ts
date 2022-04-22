@@ -2,6 +2,7 @@ import { ApplicationVerifier, RecaptchaVerifier, signInWithPhoneNumber, signOut 
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { authentication, db } from "../../firebase-config";
 import { User } from "../Models/User";
+import { getMeDocRef } from "../utils";
 
 export interface MeUpdateRequest {
   email: string;
@@ -13,9 +14,11 @@ export interface MeUpdateRequest {
   discovery_source: string;
 }
 
-export const meFetchAPI = async (id: string) => {
-  const meDocRef = doc(db, "users", id);
-  console.log(id);
+export const meFetchAPI = async () => {
+  const meDocRef = getMeDocRef();
+
+  if (!meDocRef) return;
+
   const meDoc = await getDoc(meDocRef);
   const meData = meDoc.data() as User | undefined;
 
@@ -31,10 +34,9 @@ export const meFetchAPI = async (id: string) => {
 };
 
 export const meUpdateAPI = async (data: MeUpdateRequest) => {
-  const currentUser = authentication.currentUser;
-  if (!currentUser) return;
+  const meDocRef = getMeDocRef();
 
-  const meDocRef = doc(db, "users", currentUser.uid);
+  if (!meDocRef) return;
 
   await updateDoc(meDocRef, data as any);
 

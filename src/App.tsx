@@ -1,4 +1,4 @@
-import { FC, memo, useContext, useEffect, useMemo, useState } from "react";
+import { FC, memo, useEffect, useMemo, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import { ROUTE_DEBUG, ROUTE_PROFILE, ROUTE_LOGIN, ROUTE_SLOTS, ROUTE_HOMEPAGE, ROUTE_FORWARD_SLASH } from "./constants.routes";
 import SignInPage from "./Pages/SignIn.Page";
@@ -8,7 +8,6 @@ import CompleteProfilePage from "./Pages/CompleteProfile.Page";
 import DebugPage from "./Pages/Debug.Page";
 import { signOut } from "./APIs/auth.api";
 import { handleAuthChanges, handleMeChanges } from "./utils";
-import AdmissionTestsPage from "./Pages/AdmissionTests.Page";
 import { query, collection, where, limit, onSnapshot } from "firebase/firestore";
 import ProtectedRoutes from "./Components/ProtectedRoutes";
 import NotFoundPage from "./Pages/NotFound.Page";
@@ -17,6 +16,8 @@ import { allowedRoutesContext, defaultAllowedRoutesContext } from "./Contexts/al
 import Button from "./Components/Button";
 import { httpsCallable } from "firebase/functions";
 import { User } from "./Models/User";
+import CountdownPage from "./Pages/Countdown.Page";
+import ExamsPage from "./Pages/Exams.Page";
 
 interface AppProps {}
 
@@ -40,7 +41,7 @@ const App: FC<AppProps> = () => {
       const meQuery = query(collection(db, "users"), where("phone_no", "==", user.phone_no), limit(1));
 
       const unsubMeObserver = onSnapshot(meQuery, (doc) => {
-        handleMeChanges(doc, setUser, user, allowedRoutes, setAllowedRoutes);
+        handleMeChanges(doc, setUser, allowedRoutes, setAllowedRoutes);
       });
 
       return unsubMeObserver;
@@ -103,11 +104,11 @@ const App: FC<AppProps> = () => {
           <Route path={ROUTE_FORWARD_SLASH} element={<ProtectedRoutes />}>
             <Route path={ROUTE_LOGIN} element={<SignInPage />} />
 
-            {user && <Route path={ROUTE_HOMEPAGE} element={user.status ? homepageMap[user.status] : <h1>countdown</h1>} />}
+            {user && <Route path={ROUTE_HOMEPAGE} element={user.status ? homepageMap[user.status] : <CountdownPage />} />}
 
             <Route path={ROUTE_PROFILE} element={<CompleteProfilePage />} />
 
-            <Route path={ROUTE_SLOTS} element={<AdmissionTestsPage />} />
+            <Route path={ROUTE_SLOTS} element={<ExamsPage />} />
           </Route>
 
           <Route path="*" element={<NotFoundPage />} />

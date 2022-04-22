@@ -1,24 +1,23 @@
 import { DateTime } from "luxon";
 import { FC, memo, useState } from "react";
 import { scheduleTest } from "../../APIs/cloudFunctions.api";
-import { AdmissionTestEntity } from "../../Models/AdmissionTest";
-import { secondsToHHMMSS } from "../../utils";
+import { Exam } from "../../Models/Exam";
 import ListItemCard from "../ListItemCard";
 import ListItemCardButton from "../ListItemCardButton";
 
-interface AdmissionTestCardProps {
-  admissionTest: AdmissionTestEntity;
+interface ExamCardProps {
+  exam: Exam;
   className?: string;
 }
 
-const AdmissionTestCard: FC<AdmissionTestCardProps> = ({ admissionTest, className }) => {
+const ExamCard: FC<ExamCardProps> = ({ exam, className }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleScheduleClick = async () => {
     setIsLoading(true);
 
     try {
-      await scheduleTest({ id: admissionTest.id });
+      await scheduleTest({ id: exam.external_id });
     } catch (error) {
       console.error(error);
     }
@@ -26,14 +25,10 @@ const AdmissionTestCard: FC<AdmissionTestCardProps> = ({ admissionTest, classNam
     setIsLoading(false);
   };
 
+  const startDate = new Date(exam.start_at.seconds * 1000).toISOString();
   return (
     <>
-      <ListItemCard
-        heading={admissionTest.name}
-        subheading={"Duration: " + secondsToHHMMSS(admissionTest.duration)}
-        date={DateTime.fromISO(admissionTest.start_date).toLocaleString(DateTime.DATETIME_MED)}
-        className={className}
-      >
+      <ListItemCard heading={DateTime.fromISO(startDate).toLocaleString(DateTime.DATETIME_MED)} subheading={""} date={""} className={className}>
         <ListItemCardButton isLoading={isLoading} onClick={handleScheduleClick} type="button">
           Schedule
         </ListItemCardButton>
@@ -42,4 +37,4 @@ const AdmissionTestCard: FC<AdmissionTestCardProps> = ({ admissionTest, classNam
   );
 };
 
-export default memo(AdmissionTestCard);
+export default memo(ExamCard);
