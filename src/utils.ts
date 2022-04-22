@@ -1,7 +1,8 @@
 import { User as FirebaseUser } from "@firebase/auth";
 import { Unsubscribe, DocumentData, QuerySnapshot } from "firebase/firestore";
+import { NavigateFunction } from "react-router-dom";
 import { meFetchAPI } from "./APIs/auth.api";
-import { ROUTE_PROFILE, ROUTE_SLOTS, ROUTE_FORWARD_SLASH, ROUTE_LOGIN } from "./constants.routes";
+import { ROUTE_PROFILE, ROUTE_SLOTS, ROUTE_FORWARD_SLASH, ROUTE_LOGIN, ROUTE_HOMEPAGE } from "./constants.routes";
 import { User } from "./Models/User";
 
 const studentProfileFields = ["city_of_residence", "discovery_source", "email", "first_name", "last_name", "institute_name", "phone_no"];
@@ -42,25 +43,35 @@ export const handleAuthChanges = async (
   }
 };
 
-export const handleAllowedRoutes = (user: User | null, currentAllowedRoutes: string[], setAllowedRoutes: (routes: string[]) => void) => {
+export const handleAllowedRoutes = (
+  user: User | null,
+  currentAllowedRoutes: string[],
+  setAllowedRoutes: (routes: string[]) => void,
+  navigate: NavigateFunction
+) => {
   const newAllowedRoutes = [];
+  const currentRoute = window.location.pathname;
 
   if (user === null) {
     newAllowedRoutes.push(ROUTE_LOGIN);
+    navigate("/login");
   } else if (!isStudentProfileComplete(user)) {
     newAllowedRoutes.push(ROUTE_PROFILE);
   } else if (!user.selected_exam_id) {
     newAllowedRoutes.push(ROUTE_SLOTS);
   } else if (user.status === "skipped") {
-    newAllowedRoutes.push(ROUTE_FORWARD_SLASH);
+    newAllowedRoutes.push(ROUTE_HOMEPAGE);
     newAllowedRoutes.push(ROUTE_SLOTS);
-  } else if (user.status) {
-    newAllowedRoutes.push(ROUTE_FORWARD_SLASH);
+  } else {
+    newAllowedRoutes.push(ROUTE_HOMEPAGE);
   }
 
   const check = newAllowedRoutes.sort().toString() === currentAllowedRoutes.sort().toString();
 
   if (!check) {
+    if (currentRoute === ROUTE_FORWARD_SLASH) navigate(newAllowedRoutes[0]);
+    if (currentRoute === ROUTE_LOGIN && user) navigate(newAllowedRoutes[0]);
+
     setAllowedRoutes(newAllowedRoutes);
   }
 };
@@ -69,7 +80,8 @@ export const handleMeChanges = (
   doc: QuerySnapshot<DocumentData>,
   user: User | null,
   currentAllowedRoutes: string[],
-  setAllowedRoutes: (routes: string[]) => void
+  setAllowedRoutes: (routes: string[]) => void,
+  navigate: NavigateFunction
 ) => {
   doc.docChanges().forEach((change) => {
     if (change.type === "modified") {
@@ -77,5 +89,5 @@ export const handleMeChanges = (
     }
   });
 
-  handleAllowedRoutes(user, currentAllowedRoutes, setAllowedRoutes);
+  handleAllowedRoutes(user, currentAllowedRoutes, setAllowedRoutes, navigate);
 };

@@ -1,5 +1,5 @@
 import { FC, memo, useContext, useEffect, useMemo, useState } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import { ROUTE_DEBUG, ROUTE_PROFILE, ROUTE_LOGIN, ROUTE_SLOTS, ROUTE_FORWARD_SLASH, ROUTE_HOMEPAGE } from "./constants.routes";
 import SignInPage from "./Pages/SignIn.Page";
 import { authentication, db } from "../firebase-config";
@@ -8,23 +8,22 @@ import { User } from "./Models/User";
 import CompleteProfilePage from "./Pages/CompleteProfile.Page";
 import DebugPage from "./Pages/Debug.Page";
 import { signOut } from "./APIs/auth.api";
-import { handleAllowedRoutes, handleAuthChanges, handleMeChanges } from "./utils";
+import { handleAuthChanges, handleMeChanges } from "./utils";
 import AdmissionTestsPage from "./Pages/AdmissionTests.Page";
 import { query, collection, where, limit, onSnapshot } from "firebase/firestore";
 import ProtectedRoutes from "./Components/ProtectedRoutes";
-import { allowedRoutesContext } from "./Contexts/allowedRoutes.context";
-import { userContext } from "./Contexts/user.contextt";
 import NotFoundPage from "./Pages/NotFound.Page";
+import { userContext } from "./Contexts/user.contextt";
+import { allowedRoutesContext } from "./Contexts/allowedRoutes.context";
+import AppContextProvider from "./Components/AppContext.Provider";
 
 interface AppProps {}
 
 const App: FC<AppProps> = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const userValue = useMemo(() => ({ user, setUser }), [user]);
-  const currentRoutes = useContext(allowedRoutesContext);
-  const [allowedRoutes, setAllowedRoutes] = useState<string[]>(currentRoutes.allowedRoutes);
-  const allowedRoutesValue = useMemo(() => ({ allowedRoutes, setAllowedRoutes }), [allowedRoutes]);
   const [isUserFetching, setIsUserFetching] = useState(true);
+  const { user, setUser } = useContext(userContext);
+  const { allowedRoutes, setAllowedRoutes } = useContext(allowedRoutesContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubAuthObserver = onAuthStateChanged(authentication, (me) => {
@@ -39,7 +38,7 @@ const App: FC<AppProps> = () => {
       const meQuery = query(collection(db, "users"), where("phone_no", "==", user.phone_no), limit(1));
 
       const unsubMeObserver = onSnapshot(meQuery, (doc) => {
-        handleMeChanges(doc, user, currentRoutes.allowedRoutes, setAllowedRoutes);
+        handleMeChanges(doc, user, allowedRoutes, setAllowedRoutes, navigate);
       });
 
       return unsubMeObserver;
@@ -69,37 +68,35 @@ const App: FC<AppProps> = () => {
   };
 
   return (
-    <userContext.Provider value={userValue}>
-      <allowedRoutesContext.Provider value={allowedRoutesValue}>
-        <div>
-          <button
-            onClick={async () => {
-              await signOut();
-              setUser(null);
-              window.location.href = ROUTE_LOGIN;
-            }}
-          >
-            Sign out
-          </button>
-        </div>
+    <AppContextProvider>
+      <div>
+        <button
+          onClick={async () => {
+            await signOut();
+            setUser(null);
+            window.location.href = ROUTE_LOGIN;
+          }}
+        >
+          Sign out
+        </button>
+      </div>
 
-        <Routes>
-          <Route element={<ProtectedRoutes />}>
-            <Route path={ROUTE_LOGIN} element={<SignInPage />} />
+      <Routes>
+        <Route element={<ProtectedRoutes />}>
+          <Route path={ROUTE_LOGIN} element={<SignInPage />} />
 
-            {user && <Route path={ROUTE_HOMEPAGE} element={user.status ? homepageMap[user.status] : <h1>countdown</h1>} />}
+          {user && <Route path={ROUTE_HOMEPAGE} element={user.status ? homepageMap[user.status] : <h1>countdown</h1>} />}
 
-            <Route path={ROUTE_PROFILE} element={<CompleteProfilePage />} />
+          <Route path={ROUTE_PROFILE} element={<CompleteProfilePage />} />
 
-            <Route path={ROUTE_SLOTS} element={<AdmissionTestsPage />} />
-          </Route>
+          <Route path={ROUTE_SLOTS} element={<AdmissionTestsPage />} />
+        </Route>
 
-          <Route path="*" element={<NotFoundPage />} />
+        <Route path="*" element={<NotFoundPage />} />
 
-          <Route path={ROUTE_DEBUG} element={<DebugPage />} />
-        </Routes>
-      </allowedRoutesContext.Provider>
-    </userContext.Provider>
+        <Route path={ROUTE_DEBUG} element={<DebugPage />} />
+      </Routes>
+    </AppContextProvider>
   );
 };
 
