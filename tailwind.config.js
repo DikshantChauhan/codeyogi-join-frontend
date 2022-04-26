@@ -5,6 +5,10 @@ module.exports = {
       transitionProperty: {
         height: "height",
       },
+
+      minWidth: {
+        xxs: "17.5rem",
+      },
     },
   },
   plugins: [require("flowbite/plugin")],

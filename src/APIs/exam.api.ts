@@ -39,8 +39,9 @@ export const fetchExamQuestion = async () => {
   if (!authentication.currentUser) return;
 
   const usersQuestionsCollectionref = collection(db, "users", authentication.currentUser.uid, "questions");
-  const questionQuery = query(usersQuestionsCollectionref, where("answer", "==", "null"), limit(1));
+  const questionQuery = query(usersQuestionsCollectionref, where("answer", "==", null), limit(1));
   const questionSnapShort = await getDocs(questionQuery);
+  if (questionSnapShort.empty) return;
 
   const question = questionSnapShort.docs[0].data() as any;
   console.log({ question });
@@ -51,7 +52,7 @@ export const submitExamQuestion = async (answer: answer) => {
   if (!authentication.currentUser) return;
 
   const usersQuestionsCollectionref = collection(db, "users", authentication.currentUser.uid, "questions");
-  const questionQuery = query(usersQuestionsCollectionref, where("answer", "==", "null"), limit(1));
+  const questionQuery = query(usersQuestionsCollectionref, where("answer", "==", null), limit(1));
   const questionSnapShort = await getDocs(questionQuery);
 
   const questionRef = questionSnapShort.docs[0].ref;

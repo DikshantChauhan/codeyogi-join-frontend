@@ -14,18 +14,19 @@ interface QuestioinCardProps {
 }
 
 const QuestionCard: FC<QuestioinCardProps> = ({ admissionQuestion, isSubmitting, trySubmit }) => {
-    console.log(admissionQuestion)
+  console.log(admissionQuestion);
   const formik = useFormik({
     initialValues: { userAnswer: "" },
     validationSchema: yup.object().shape({ userAnswer: yup.string().required() }),
     onSubmit: (data) => {
       trySubmit(data.userAnswer as "A" | "B" | "C" | "D" | "pass");
+      formik.setValues(formik.initialValues);
     },
     // validateOnMount: true,
   });
 
   return (
-    <div className="w-full max-w-md p-2 py-6 mx-auto">
+    <div className="max-w-lg min-w-xxs p-2 py-6 mx-auto">
       <h2>{admissionQuestion.questionText}</h2>
 
       <form onSubmit={formik.handleSubmit}>
@@ -70,17 +71,9 @@ const QuestionCard: FC<QuestioinCardProps> = ({ admissionQuestion, isSubmitting,
           <p className="text-center">Loading new Question...</p>
         ) : (
           <div className="flex justify-between">
-            <Button
-              className={`p4 flex-1 ${formik.values.userAnswer ? "" : "cursor-not-allowed"}`}
-              name="next"
-              type="submit"
-              disabled={true}
-              onClick={(e) => {
-                console.log("save button clicked");
-              }}
-            >
+            <SubmitButton className={`p4 flex-1 ${formik.values.userAnswer ? "" : "cursor-not-allowed"}`} name="next" type="submit" disabled={true}>
               Save and next
-            </Button>
+            </SubmitButton>
             <SubmitButton
               className="flex-1 p-4"
               name="skip"
