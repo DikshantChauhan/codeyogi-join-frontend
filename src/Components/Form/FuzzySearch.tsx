@@ -22,6 +22,7 @@ const FuzzySearch: React.FC<FuzzySearchProps> = ({ touched, error, displayKey, v
 
   const [showResults, setShowResults] = useState(false);
   const wrapperRef = useRef<any>(null);
+
   useEffect(() => {
     const handleClickOutside = (event: any) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -36,14 +37,21 @@ const FuzzySearch: React.FC<FuzzySearchProps> = ({ touched, error, displayKey, v
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+  const topResults = [];
+
+  for (let index = 0; index < 20; index++) {
+    {
+      results[index] && topResults.push(results[index]);
+    }
+  }
+
   return (
     <div className={"relative overflow-visible " + className} ref={wrapperRef}>
       <Input {...rest} touched={touched} error={error} value={value} className="mb-2" />
 
       {results.length > 0 && showResults && (
-        <div className="absolute z-50 min-w-full bg-white border border-gray-300 rounded-md shadow-lg">
-          {results.map((result, index) => {
-            if (index >= 10) return;
+        <div className="absolute z-50 min-w-full overflow-scroll bg-white border border-gray-300 rounded-md shadow-lg max-h-40">
+          {topResults.map((result, index) => {
             return (
               <h1
                 onClick={() => {
@@ -51,7 +59,7 @@ const FuzzySearch: React.FC<FuzzySearchProps> = ({ touched, error, displayKey, v
                   setShowResults(false);
                 }}
                 key={index}
-                className={"cursor-pointer hover:bg-gray-200 " + (index !== 3 ? "border-b border-gray-400  " : "")}
+                className={"cursor-pointer h-8 font-semibold text-base hover:bg-gray-200 border-b border-gray-400"}
               >
                 {result.item[displayKey]}
               </h1>

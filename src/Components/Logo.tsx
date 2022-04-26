@@ -32,7 +32,7 @@ interface LogoProps {
     | "CodeYogiLogoHindiWhite"
     | "CodeYogiLogoWhite"
     | "CodeYogiLogoWhiteBg";
-  size: "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl";
+  size: "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl";
 }
 
 const Logo: React.FC<LogoProps> = ({ className, type, size }) => {
@@ -70,12 +70,16 @@ const Logo: React.FC<LogoProps> = ({ className, type, size }) => {
       sizeClass = "w-28 h-28";
       break;
 
+    case "5xl":
+      sizeClass = "w-32 h-32";
+      break;
+
     default:
       break;
   }
   return (
-    <Link to={ROUTE_FORWARD_SLASH} className={` ${className}`}>
-      <img src={logos[type]} alt="Codeyogi logo" className={`${sizeClass}`} />
+    <Link to={ROUTE_FORWARD_SLASH}>
+      <img src={logos[type]} alt="Codeyogi logo" className={`${sizeClass}  ${className}`} />
     </Link>
   );
 };

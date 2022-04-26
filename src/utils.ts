@@ -45,7 +45,12 @@ export const handleAuthChanges = async (
   }
 };
 
-export const handleAllowedRoutes = (user: User | null, currentAllowedRoutes: string[], setAllowedRoutes: (routes: string[]) => void) => {
+export const handleAllowedRoutes = (
+  user: User | null,
+  currentAllowedRoutes: string[],
+  setAllowedRoutes: (routes: string[]) => void,
+  navigate: NavigateFunction
+) => {
   const newAllowedRoutes = [];
   const currentRoute = window.location.pathname;
 
@@ -67,9 +72,9 @@ export const handleAllowedRoutes = (user: User | null, currentAllowedRoutes: str
   if (!check) {
     setAllowedRoutes(newAllowedRoutes);
 
-    if (currentRoute === ROUTE_FORWARD_SLASH) window.location.href = newAllowedRoutes[0];
-    if (currentRoute === ROUTE_LOGIN && user) window.location.href = newAllowedRoutes[0];
-    if (!!!newAllowedRoutes.find((route) => route === currentRoute)) window.location.href = newAllowedRoutes[0];
+    if (currentRoute === ROUTE_FORWARD_SLASH) navigate(newAllowedRoutes[0]);
+    if (currentRoute === ROUTE_LOGIN && user) navigate(newAllowedRoutes[0]);
+    if (!!!newAllowedRoutes.find((route) => route === currentRoute)) navigate(newAllowedRoutes[0]);
   }
 };
 
@@ -77,7 +82,8 @@ export const handleMeChanges = (
   doc: QuerySnapshot<DocumentData>,
   setUser: (user: User | null) => void,
   currentAllowedRoutes: string[],
-  setAllowedRoutes: (routes: string[]) => void
+  setAllowedRoutes: (routes: string[]) => void,
+  navigate: NavigateFunction
 ) => {
   setTimeout(() => {
     let changedUser: User | null = null;
@@ -89,7 +95,7 @@ export const handleMeChanges = (
     });
 
     if (changedUser) {
-      handleAllowedRoutes(changedUser, currentAllowedRoutes, setAllowedRoutes);
+      handleAllowedRoutes(changedUser, currentAllowedRoutes, setAllowedRoutes, navigate);
     }
   }, 1500);
 };

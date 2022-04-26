@@ -7,6 +7,7 @@ import SubmitButton from "../Components/SubmitButton";
 import Logo from "../Components/Logo";
 import { ROUTE_FORWARD_SLASH } from "../constants.routes";
 import { useNavigate } from "react-router";
+import Heading from "../Components/Heading";
 
 interface SignInPageProps {}
 
@@ -87,21 +88,32 @@ const SignInPage: FC<SignInPageProps> = () => {
 
   return (
     <div className="mx-2">
-      <div className="flex flex-col items-center justify-center max-w-sm min-h-screen mx-auto">
-        <Logo type="CodeYogiLogoEnglishBlack" size="3xl" />
+      <div className="flex flex-col items-center justify-center max-w-2xl min-h-screen mx-auto">
+        <Logo type="CodeYogiLogoEnglishBlack" size="5xl" />
 
-        <form onSubmit={formik.handleSubmit} className={`mt-10 w-full`}>
-          <Input
-            id="phoneNumber"
-            type="number"
-            placeholder="Phone Number"
-            {...formik.getFieldProps("phoneNumber")}
-            touched={formik.touched.phoneNumber}
-            error={formik.errors.phoneNumber}
-            value={formik.values.phoneNumber}
-            className="w-full mb-10"
-            disabled={isOTPSent ? true : false}
-          />
+        <Heading>Enter your phone number below to join/register with us</Heading>
+        <h3 className={`text-red-500 sm:mt-2 mt-5`}>
+          (<span className={`font-semibold`}>NOTE</span>: This phone number cannot be changed later)
+        </h3>
+
+        <form onSubmit={formik.handleSubmit} className={`mt-10 w-full max-w-lg`}>
+          <div className={`flex `}>
+            <label htmlFor="phoneNumber" className={`min-w-max mt-4`}>
+              Phone number
+            </label>
+
+            <Input
+              id="phoneNumber"
+              type="number"
+              placeholder="Phone Number"
+              {...formik.getFieldProps("phoneNumber")}
+              touched={formik.touched.phoneNumber}
+              error={formik.errors.phoneNumber}
+              value={formik.values.phoneNumber}
+              className={`ml-4 w-full`}
+              disabled={isOTPSent ? true : false}
+            />
+          </div>
 
           {isOTPSent && (
             <Input
@@ -112,7 +124,7 @@ const SignInPage: FC<SignInPageProps> = () => {
               touched={formik.touched.OTP}
               error={formik.errors.OTP}
               value={formik.values.OTP}
-              className="w-full mb-10"
+              className={`mx-auto w-48 mb-5`}
             />
           )}
 

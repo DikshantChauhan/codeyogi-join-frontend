@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, limit, query, setDoc, where } from "firebase/firestore";
+import { collection, getDoc, getDocs, limit, query, setDoc, where } from "firebase/firestore";
 import { authentication, db } from "../../firebase-config";
 import { Exam } from "../Models/Exam";
 import { answer, Question } from "../Models/Question";
