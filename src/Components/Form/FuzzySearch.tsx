@@ -47,10 +47,10 @@ const FuzzySearch: React.FC<FuzzySearchProps> = ({ touched, error, displayKey, v
 
   return (
     <div className={"relative overflow-visible " + className} ref={wrapperRef}>
-      <Input {...rest} touched={touched} error={error} value={value} className="mb-2" />
+      <Input {...rest} touched={touched} error={error} value={value} />
 
       {results.length > 0 && showResults && (
-        <div className="absolute z-50 min-w-full overflow-scroll bg-white border border-gray-300 rounded-md shadow-lg max-h-40">
+        <div className="absolute z-50 min-w-full overflow-scroll bg-white border border-gray-300 rounded-md shadow-lg max-h-52">
           {topResults.map((result, index) => {
             return (
               <h1
@@ -59,7 +59,7 @@ const FuzzySearch: React.FC<FuzzySearchProps> = ({ touched, error, displayKey, v
                   setShowResults(false);
                 }}
                 key={index}
-                className={"cursor-pointer h-8 font-semibold text-base hover:bg-gray-200 border-b border-gray-400"}
+                className={"cursor-pointer p-1 h-fit font-semibold text-base hover:bg-gray-200 border-b border-gray-400"}
               >
                 {result.item[displayKey]}
               </h1>

@@ -124,7 +124,7 @@ const SignInPage: FC<SignInPageProps> = () => {
               touched={formik.touched.OTP}
               error={formik.errors.OTP}
               value={formik.values.OTP}
-              className={`mx-auto w-48 mb-5`}
+              className={`mx-auto w-48`}
             />
           )}
 

@@ -96,9 +96,9 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
         <h3 className={`text-red-500 mt-2`}>(All the fields are required)</h3>
 
         <div className="mt-2 overflow-hidden bg-white border border-gray-200 border-opacity-50 shadow sm:rounded-lg">
-          <dl className="sm:divide-y sm:divide-gray-200">
+          <dl className="px-4 py-2 py-sm:divide-y sm:divide-gray-200">
             <form onSubmit={formik.handleSubmit}>
-              <div className="items-center py-4 sm:py-5 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
+              <div className="items-center py-1 sm:py-3 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
                 <dt className="text-sm font-medium text-gray-500">Email</dt>
 
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">
@@ -111,13 +111,12 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
                     touched={formik.touched.email}
                     error={formik.errors.email}
                     value={formik.values.email}
-                    className="mb-2"
                   />
                 </dd>
               </div>
 
               <div className="flex flex-col sm:flex-row">
-                <div className="items-center flex-1 py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <div className="items-center flex-1 py-1 sm:py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                   <dt className="text-sm font-medium text-gray-500">First Name</dt>
 
                   <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
@@ -130,12 +129,11 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
                       touched={formik.touched.first_name}
                       error={formik.errors.first_name}
                       value={formik.values.first_name}
-                      className="mb-2"
                     />
                   </dd>
                 </div>
 
-                <div className="items-center flex-1 py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:pr-6">
+                <div className="items-center flex-1 py-1 sm:py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:pr-6">
                   <dt className="text-sm font-medium text-gray-500">Last Name</dt>
 
                   <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
@@ -148,13 +146,12 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
                       touched={formik.touched.last_name}
                       error={formik.errors.last_name}
                       value={formik.values.last_name}
-                      className="mb-2"
                     />
                   </dd>
                 </div>
               </div>
 
-              <div className="items-center py-4 sm:py-5 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
+              <div className="items-center py-1 sm:py-3 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
                 <dt className="text-sm font-medium text-gray-500">Phone Number</dt>
 
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">
@@ -167,7 +164,6 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
                     touched={formik.touched.phone_no}
                     error={formik.errors.phone_no}
                     value={formik.values.phone_no}
-                    className="mb-2"
                   />
                 </dd>
               </div>
@@ -193,7 +189,7 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
                 </dd>
               </div>
 
-              <div className="items-center py-4 sm:py-5 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
+              <div className="items-center py-1 sm:py-3 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
                 <dt className="text-sm font-medium text-gray-500">City Of Residence</dt>
 
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">
@@ -206,7 +202,6 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
                     touched={formik.touched.city_of_residence}
                     error={formik.errors.city_of_residence}
                     value={formik.values.city_of_residence}
-                    className="mb-2"
                   />
                 </dd>
               </div>

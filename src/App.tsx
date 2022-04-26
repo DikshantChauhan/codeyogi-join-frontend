@@ -1,5 +1,5 @@
 import { FC, memo, useEffect, useMemo, useState } from "react";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Outlet, Route, Routes, useNavigate } from "react-router-dom";
 import {
   ROUTE_DEBUG,
   ROUTE_PROFILE,
@@ -26,7 +26,7 @@ import CountdownPage from "./Pages/Countdown.Page";
 import ExamsPage from "./Pages/Exams.Page";
 import ExamInstructionsPage from "./Pages/ExamInstructions.Page";
 import MainExamPage from "./Pages/MainExamPage";
-import { test } from "./APIs/cloudFunctions.api";
+import AppContainer from "./Components/AppContainer";
 
 interface AppProps {}
 
@@ -79,18 +79,22 @@ const App: FC<AppProps> = () => {
           <Route path={ROUTE_FORWARD_SLASH} element={<ProtectedRoutes />}>
             <Route path={ROUTE_LOGIN} element={<SignInPage />} />
 
-            {user && <Route path={ROUTE_HOMEPAGE} element={user.status ? homepageMap[user.status] : <CountdownPage />} />}
+            <Route element={<AppContainer />}>
+              {user && <Route path={ROUTE_HOMEPAGE} element={user.status ? homepageMap[user.status] : <CountdownPage />} />}
 
-            <Route path={ROUTE_PROFILE} element={<CompleteProfilePage />} />
+              <Route path={ROUTE_PROFILE} element={<CompleteProfilePage />} />
 
-            <Route path={ROUTE_SLOTS} element={<ExamsPage />} />
+              <Route path={ROUTE_SLOTS} element={<ExamsPage />} />
+            </Route>
           </Route>
 
-          <Route path="*" element={<NotFoundPage />} />
-
           <Route path={ROUTE_DEBUG} element={<DebugPage />} />
+
           <Route path={ROUTE_EXAM_INSTRUCTIONS} element={<ExamInstructionsPage />} />
+
           <Route path={ROUTE_EXAM} element={<MainExamPage />} />
+
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </allowedRoutesContext.Provider>
     </userContext.Provider>

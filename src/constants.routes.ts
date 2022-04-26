@@ -6,3 +6,9 @@ export const ROUTE_SLOTS = "/slots";
 export const ROUTE_DEBUG = "/debug";
 export const ROUTE_EXAM_INSTRUCTIONS = "/exam/instructions";
 export const ROUTE_EXAM = "/exam";
+
+export const NAVBAR_NAMES: { [key: string]: string } = {
+  "/profile": "Profile",
+  "/home": "Home",
+  "/slots": "Schedule Exam",
+};
