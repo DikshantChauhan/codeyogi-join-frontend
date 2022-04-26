@@ -1,5 +1,5 @@
 import { FC, memo, useEffect, useMemo, useState } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import {
   ROUTE_DEBUG,
   ROUTE_PROFILE,
@@ -11,24 +11,22 @@ import {
   ROUTE_EXAM,
 } from "./constants.routes";
 import SignInPage from "./Pages/SignIn.Page";
-import { authentication, db, functions } from "../firebase-config";
+import { authentication, db } from "../firebase-config";
 import { onAuthStateChanged } from "firebase/auth";
 import CompleteProfilePage from "./Pages/CompleteProfile.Page";
 import DebugPage from "./Pages/Debug.Page";
-import { signOut } from "./APIs/auth.api";
 import { handleAuthChanges, handleMeChanges } from "./utils";
 import { query, collection, where, limit, onSnapshot } from "firebase/firestore";
 import ProtectedRoutes from "./Components/ProtectedRoutes";
 import NotFoundPage from "./Pages/NotFound.Page";
 import { defaultUserContext, userContext } from "./Contexts/user.contextt";
 import { allowedRoutesContext, defaultAllowedRoutesContext } from "./Contexts/allowedRoutes.context";
-import Button from "./Components/Button";
-import { httpsCallable } from "firebase/functions";
 import { User } from "./Models/User";
 import CountdownPage from "./Pages/Countdown.Page";
 import ExamsPage from "./Pages/Exams.Page";
 import ExamInstructionsPage from "./Pages/ExamInstructions.Page";
 import MainExamPage from "./Pages/MainExamPage";
+import { test } from "./APIs/cloudFunctions.api";
 
 interface AppProps {}
 
@@ -38,7 +36,7 @@ const App: FC<AppProps> = () => {
   const [allowedRoutes, setAllowedRoutes] = useState<string[]>(defaultAllowedRoutesContext.allowedRoutes);
   const allowedRoutesValue = useMemo(() => ({ allowedRoutes, setAllowedRoutes }), [allowedRoutes]);
   const [isUserFetching, setIsUserFetching] = useState(true);
-  console.log(user);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubAuthObserver = onAuthStateChanged(authentication, (me) => {
@@ -53,7 +51,7 @@ const App: FC<AppProps> = () => {
       const meQuery = query(collection(db, "users"), where("phone_no", "==", user.phone_no), limit(1));
 
       const unsubMeObserver = onSnapshot(meQuery, (doc) => {
-        handleMeChanges(doc, setUser, allowedRoutes, setAllowedRoutes);
+        handleMeChanges(doc, setUser, allowedRoutes, setAllowedRoutes, navigate);
       });
 
       return unsubMeObserver;
