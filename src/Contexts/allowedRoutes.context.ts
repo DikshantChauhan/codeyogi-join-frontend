@@ -1,11 +1,11 @@
 import { createContext } from "react";
-import { ROUTE_LOGIN } from "../constants.routes";
+import { ROUTE_FORWARD_SLASH, ROUTE_LOGIN } from "../constants.routes";
 
 export const defaultAllowedRoutesContext: {
   allowedRoutes: string[];
   setAllowedRoutes: (routes: string[]) => void;
 } = {
-  allowedRoutes: [ROUTE_LOGIN],
+  allowedRoutes: [ROUTE_FORWARD_SLASH],
   setAllowedRoutes: (routes: string[]) => {
     defaultAllowedRoutesContext.allowedRoutes = routes;
   },

@@ -1,6 +1,15 @@
 import { FC, memo, useEffect, useMemo, useState } from "react";
 import { Route, Routes } from "react-router-dom";
-import { ROUTE_DEBUG, ROUTE_PROFILE, ROUTE_LOGIN, ROUTE_SLOTS, ROUTE_HOMEPAGE, ROUTE_FORWARD_SLASH } from "./constants.routes";
+import {
+  ROUTE_DEBUG,
+  ROUTE_PROFILE,
+  ROUTE_LOGIN,
+  ROUTE_SLOTS,
+  ROUTE_HOMEPAGE,
+  ROUTE_FORWARD_SLASH,
+  ROUTE_EXAM_INSTRUCTIONS,
+  ROUTE_EXAM,
+} from "./constants.routes";
 import SignInPage from "./Pages/SignIn.Page";
 import { authentication, db, functions } from "../firebase-config";
 import { onAuthStateChanged } from "firebase/auth";
@@ -18,6 +27,8 @@ import { httpsCallable } from "firebase/functions";
 import { User } from "./Models/User";
 import CountdownPage from "./Pages/Countdown.Page";
 import ExamsPage from "./Pages/Exams.Page";
+import ExamInstructionsPage from "./Pages/ExamInstructions.Page";
+import MainExamPage from "./Pages/MainExamPage";
 
 interface AppProps {}
 
@@ -27,6 +38,7 @@ const App: FC<AppProps> = () => {
   const [allowedRoutes, setAllowedRoutes] = useState<string[]>(defaultAllowedRoutesContext.allowedRoutes);
   const allowedRoutesValue = useMemo(() => ({ allowedRoutes, setAllowedRoutes }), [allowedRoutes]);
   const [isUserFetching, setIsUserFetching] = useState(true);
+  console.log(user);
 
   useEffect(() => {
     const unsubAuthObserver = onAuthStateChanged(authentication, (me) => {
@@ -51,14 +63,6 @@ const App: FC<AppProps> = () => {
   if (isUserFetching) {
     return (
       <div>
-        <button
-          onClick={async () => {
-            await signOut();
-            setUser(null);
-          }}
-        >
-          Sign out
-        </button>
         <h1>Loading....</h1>;
       </div>
     );
@@ -73,33 +77,6 @@ const App: FC<AppProps> = () => {
   return (
     <userContext.Provider value={userValue}>
       <allowedRoutesContext.Provider value={allowedRoutesValue}>
-        <div>
-          <button
-            onClick={async () => {
-              await signOut();
-              setUser(null);
-              window.location.href = ROUTE_LOGIN;
-            }}
-          >
-            Sign out
-          </button>
-
-          <Button
-            onClick={async () => {
-              const sayHello = httpsCallable(functions, "test");
-              sayHello({ id: 1 })
-                .then((result) => {
-                  console.log(result.data);
-                })
-                .catch((error) => {
-                  console.error(error);
-                });
-            }}
-          >
-            test
-          </Button>
-        </div>
-
         <Routes>
           <Route path={ROUTE_FORWARD_SLASH} element={<ProtectedRoutes />}>
             <Route path={ROUTE_LOGIN} element={<SignInPage />} />
@@ -114,6 +91,8 @@ const App: FC<AppProps> = () => {
           <Route path="*" element={<NotFoundPage />} />
 
           <Route path={ROUTE_DEBUG} element={<DebugPage />} />
+          <Route path={ROUTE_EXAM_INSTRUCTIONS} element={<ExamInstructionsPage />} />
+          <Route path={ROUTE_EXAM} element={<MainExamPage />} />
         </Routes>
       </allowedRoutesContext.Provider>
     </userContext.Provider>

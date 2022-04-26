@@ -69,7 +69,7 @@ export const handleAllowedRoutes = (user: User | null, currentAllowedRoutes: str
 
     if (currentRoute === ROUTE_FORWARD_SLASH) window.location.href = newAllowedRoutes[0];
     if (currentRoute === ROUTE_LOGIN && user) window.location.href = newAllowedRoutes[0];
-    if (currentRoute !== newAllowedRoutes[0]) window.location.href = newAllowedRoutes[0];
+    if (!!!newAllowedRoutes.find((route) => route === currentRoute)) window.location.href = newAllowedRoutes[0];
   }
 };
 
