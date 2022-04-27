@@ -9,8 +9,6 @@ interface Props extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input: React.FC<Props> = ({ className, prefix, children, fieldClasses, touched, error, disabled, ...rest }) => {
-  console.log({ touched, error });
-
   return (
     <div className={`relative overflow-visible sm:text-sm ${className}`}>
       <div className={`flex mt-1 rounded-md shadow-sm ${touched ? (error ? "mb-0" : "mb-5") : "mb-6"}`}>

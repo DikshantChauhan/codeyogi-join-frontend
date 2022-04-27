@@ -36,7 +36,7 @@ const SignInPage: FC<SignInPageProps> = () => {
 
       setIsOTPSent(true);
     } catch (error) {
-      console.log("error => ", error);
+      console.error("error => ", error);
 
       setIsOTPSent(false);
       formik.setErrors({ ...formik.errors, phoneNumber: "OTP not sent, either retry or try after some time!" });

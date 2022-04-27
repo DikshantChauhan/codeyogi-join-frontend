@@ -3,7 +3,7 @@ import { Navigate } from "react-router";
 import { fetchExamQuestion, submitExamQuestion } from "../APIs/exam.api";
 import QuestionCard from "../Components/AdmissionTest/QuestionCard";
 import { ROUTE_HOMEPAGE } from "../constants.routes";
-import { answer, Question } from "../Models/Question";
+import { StudentAnswerOptions, StudentQuestion } from "../Models/StudentQuestion";
 
 interface MainExamPageProps {}
 
@@ -13,7 +13,7 @@ const MainExamPage: FC<MainExamPageProps> = () => {
   const [isSubmiting, setIssubmitting] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState("");
-  const [admissionQuestions, setAdmissionQuestions] = useState<Question[]>([]);
+  const [admissionQuestions, setAdmissionQuestions] = useState<StudentQuestion[]>([]);
 
   const handleRef = useCallback((node) => {
     if (node !== null) {
@@ -21,7 +21,7 @@ const MainExamPage: FC<MainExamPageProps> = () => {
     }
   }, []);
 
-  const handleSlide = (questions: Question[]) => {
+  const handleSlide = (questions: StudentQuestion[]) => {
     setIsAnimating(true);
 
     setTimeout(() => {
@@ -32,7 +32,7 @@ const MainExamPage: FC<MainExamPageProps> = () => {
     }, 500);
   };
 
-  const handleSubmit = (answer: answer) => {
+  const handleSubmit = (answer: StudentAnswerOptions) => {
     setIssubmitting(true);
     setError("");
     submitExamQuestion(answer)
@@ -58,7 +58,7 @@ const MainExamPage: FC<MainExamPageProps> = () => {
       .catch((error) => {
         setIssubmitting(false);
         setError("Unable to Submit your answer! please try again.");
-        console.log(error);
+        console.error(error);
       });
   };
 
@@ -78,16 +78,13 @@ const MainExamPage: FC<MainExamPageProps> = () => {
         setError("Unable to fetch question! please try again.");
       });
   }, []);
-  // window.addEventListener("resize", () =>{
-  //   console.log("hello")
-  // })
 
   return (
     <div>
       {!isFetching && admissionQuestions.length === 0 ? (
         <Navigate to={ROUTE_HOMEPAGE} />
       ) : (
-        <div className="flex justify-center items-center min-h-screen">
+        <div className="flex items-center justify-center min-h-screen">
           <div style={{ height: `${selectedIteamHeight}px` }}>
             {admissionQuestions.map((question, index) => {
               const ref = index === 0 ? handleRef : null;

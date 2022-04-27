@@ -2,31 +2,31 @@ import { RadioGroup } from "@headlessui/react";
 import { useFormik } from "formik";
 import { memo, FC } from "react";
 import * as yup from "yup";
-import { Question } from "../../Models/Question";
 import { HiCheck } from "react-icons/hi";
-import Button from "../Button";
 import SubmitButton from "../SubmitButton";
+import { StudentAnswerOptions, StudentQuestion } from "../../Models/StudentQuestion";
 
 interface QuestioinCardProps {
-  admissionQuestion: Question;
+  admissionQuestion: StudentQuestion;
   isSubmitting: boolean;
-  trySubmit: (answer: "A" | "B" | "C" | "D" | "pass") => void;
+  trySubmit: (answer: StudentAnswerOptions) => void;
 }
 
 const QuestionCard: FC<QuestioinCardProps> = ({ admissionQuestion, isSubmitting, trySubmit }) => {
-  console.log(admissionQuestion);
-  const formik = useFormik({
-    initialValues: { userAnswer: "" },
+  const formik = useFormik<{ userAnswer: StudentAnswerOptions }>({
+    initialValues: { userAnswer: null },
+
     validationSchema: yup.object().shape({ userAnswer: yup.string().required() }),
+
     onSubmit: (data) => {
-      trySubmit(data.userAnswer as "A" | "B" | "C" | "D" | "pass");
+      trySubmit(data.userAnswer);
       formik.setValues(formik.initialValues);
     },
     // validateOnMount: true,
   });
 
   return (
-    <div className="max-w-lg min-w-xxs p-2 py-6 mx-auto">
+    <div className="max-w-lg p-2 py-6 mx-auto min-w-xxs">
       <h2>{admissionQuestion.questionText}</h2>
 
       <form onSubmit={formik.handleSubmit}>

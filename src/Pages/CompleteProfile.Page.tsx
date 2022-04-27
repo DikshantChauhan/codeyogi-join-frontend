@@ -35,7 +35,6 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
     email: string;
     first_name: string;
     last_name: string;
-    phone_no: number;
     institute_name: string;
     city_of_residence: string;
     discovery_source: string;
@@ -44,7 +43,6 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
       email: user.email || "",
       first_name: user.first_name || "",
       last_name: user.last_name || "",
-      phone_no: +user.phone_no,
       institute_name: user.institute_name || "",
       city_of_residence: user.city_of_residence || "",
       discovery_source: user.discovery_source || "",
@@ -53,7 +51,6 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
       email: yup.string().trim().email("Please enter a valid email").required(),
       first_name: yup.string().trim().required(),
       last_name: yup.string().trim().required(),
-      phone_no: yup.number().required().lessThan(10000000000, "Must be exactly 10 digits").moreThan(999999999, "Must be exactly 10 digits"),
       institute_name: yup.string().trim().required(),
       city_of_residence: yup.string().trim().required(),
       discovery_source: yup.string().trim().required(),
@@ -89,8 +86,6 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
   return (
     <div className={`py-10`}>
       <div className="inset-0 w-3/4 m-auto lg:w-1/2 ">
-        <Logo type="CodeYogiLogoEnglishBlack" size="5xl" className="mx-auto" />
-
         <Heading>Please Complete Your Profile</Heading>
 
         <h3 className={`text-red-500 mt-2`}>(All the fields are required)</h3>
@@ -161,9 +156,9 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
                     type="number"
                     placeholder="Phone Number"
                     {...formik.getFieldProps("phone_no")}
-                    touched={formik.touched.phone_no}
-                    error={formik.errors.phone_no}
-                    value={formik.values.phone_no}
+                    touched={false}
+                    error={undefined}
+                    value={+user.phone_no}
                   />
                 </dd>
               </div>

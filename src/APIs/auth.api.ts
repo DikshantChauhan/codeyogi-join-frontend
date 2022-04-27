@@ -8,7 +8,6 @@ export interface MeUpdateRequest {
   email: string;
   first_name: string;
   last_name: string;
-  phone_no: number;
   institute_name: string;
   city_of_residence: string;
   discovery_source: string;
