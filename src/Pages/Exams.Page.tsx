@@ -18,8 +18,7 @@ const Exams: FC<ExamsProps> = ({}) => {
 
   return (
     <>
-      <h1 className={`text-xl font-bold`}>Test for CodeYogi</h1>
-
+      <h1 className={`text-2xl text-center font-semibold mt-4 mb-2`}>Pick a slot for exam</h1>
       <ExamGrid exams={exams} />
     </>
   );

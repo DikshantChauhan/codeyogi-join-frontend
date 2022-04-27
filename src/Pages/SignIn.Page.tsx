@@ -91,14 +91,14 @@ const SignInPage: FC<SignInPageProps> = () => {
       <div className="flex flex-col items-center justify-center max-w-2xl min-h-screen mx-auto">
         <Logo type="CodeYogiLogoEnglishBlack" size="5xl" />
 
-        <Heading>Enter your phone number below to join/register with us</Heading>
-        <h3 className={`text-red-500 sm:mt-2 mt-5`}>
+        <Heading className="text-center">Login/register with us</Heading>
+        <h3 className={`text-red-500 sm:mt-2 mt-5 text-center`}>
           (<span className={`font-semibold`}>NOTE</span>: This phone number cannot be changed later)
         </h3>
 
         <form onSubmit={formik.handleSubmit} className={`mt-10 w-full max-w-lg`}>
-          <div className={`flex `}>
-            <label htmlFor="phoneNumber" className={`min-w-max mt-4`}>
+          <div className={`flex flex-col items-start`}>
+            <label htmlFor="phoneNumber" className={`min-w-max`}>
               Phone number
             </label>
 
@@ -110,25 +110,31 @@ const SignInPage: FC<SignInPageProps> = () => {
               touched={formik.touched.phoneNumber}
               error={formik.errors.phoneNumber}
               value={formik.values.phoneNumber}
-              className={`ml-4 w-full`}
+              className={`w-full`}
               disabled={isOTPSent ? true : false}
             />
           </div>
 
           {isOTPSent && (
-            <Input
-              id="OTP"
-              type="text"
-              placeholder="OTP"
-              {...formik.getFieldProps("OTP")}
-              touched={formik.touched.OTP}
-              error={formik.errors.OTP}
-              value={formik.values.OTP}
-              className={`mx-auto w-48`}
-            />
+            <div className={`flex flex-col items-start`}>
+              <label htmlFor="OTP" className={`min-w-max`}>
+                Phone number
+              </label>
+
+              <Input
+                id="OTP"
+                type="text"
+                placeholder="OTP"
+                {...formik.getFieldProps("OTP")}
+                touched={formik.touched.OTP}
+                error={formik.errors.OTP}
+                value={formik.values.OTP}
+                className={`w-full`}
+              />
+            </div>
           )}
 
-          <SubmitButton className={`w-32`} isLoading={isOTPSending || isOTPSubmitting}>
+          <SubmitButton className={`w-32 mt-3`} isLoading={isOTPSending || isOTPSubmitting}>
             {isOTPSent ? "Submit OTP" : "Get OTP"}
           </SubmitButton>
         </form>
