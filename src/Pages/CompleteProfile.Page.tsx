@@ -9,7 +9,6 @@ import { fetchInstitutesListAPI } from "../APIs/institute.api";
 import { discoverySoucresFetchAPI } from "../APIs/discoverySources.api";
 import { meUpdateAPI } from "../APIs/auth.api";
 import { userContext } from "../Contexts/user.contextt";
-import Logo from "../Components/Logo";
 import Heading from "../Components/Heading";
 
 interface CompleteProfileProps {}
