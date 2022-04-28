@@ -54,17 +54,23 @@ export const handleAllowedRoutes = (
   const newAllowedRoutes = [];
   const currentRoute = window.location.pathname;
 
-  if (user === null) {
+  if (!user) {
     newAllowedRoutes.push(ROUTE_LOGIN);
-  } else if (!isStudentProfileComplete(user)) {
-    newAllowedRoutes.push(ROUTE_PROFILE);
-  } else if (!user.selected_exam_id) {
-    newAllowedRoutes.push(ROUTE_SLOTS);
-  } else if (user.status === "skipped") {
-    newAllowedRoutes.push(ROUTE_HOMEPAGE);
-    newAllowedRoutes.push(ROUTE_SLOTS);
   } else {
-    newAllowedRoutes.push(ROUTE_HOMEPAGE);
+    if (isStudentProfileComplete(user)) {
+      if (!user.selected_exam_id) {
+        newAllowedRoutes.push(ROUTE_SLOTS);
+      } else {
+        if (user.status === "skipped") {
+          newAllowedRoutes.push(ROUTE_HOMEPAGE);
+          newAllowedRoutes.push(ROUTE_SLOTS);
+        } else {
+          newAllowedRoutes.push(ROUTE_HOMEPAGE);
+        }
+      }
+    }
+
+    newAllowedRoutes.push(ROUTE_PROFILE);
   }
 
   const check = newAllowedRoutes.sort().toString() === currentAllowedRoutes.sort().toString();
@@ -87,6 +93,7 @@ export const handleMeChanges = (
 ) => {
   setTimeout(() => {
     let changedUser: User | null = null;
+
     doc.docChanges().forEach((change) => {
       if (change.type === "modified") {
         changedUser = change.doc.data() as User | null;

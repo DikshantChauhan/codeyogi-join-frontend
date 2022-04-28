@@ -33,9 +33,10 @@ interface LogoProps {
     | "CodeYogiLogoWhite"
     | "CodeYogiLogoWhiteBg";
   size: "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl";
+  allowRedirect?: boolean;
 }
 
-const Logo: React.FC<LogoProps> = ({ className, type, size }) => {
+const Logo: React.FC<LogoProps> = ({ className, type, size, allowRedirect }) => {
   let sizeClass = "";
   switch (size) {
     case "xs":
@@ -77,13 +78,17 @@ const Logo: React.FC<LogoProps> = ({ className, type, size }) => {
     default:
       break;
   }
-  return (
+  return allowRedirect ? (
     <Link to={ROUTE_FORWARD_SLASH}>
       <img src={logos[type]} alt="Codeyogi logo" className={`${sizeClass}  ${className}`} />
     </Link>
+  ) : (
+    <img src={logos[type]} alt="Codeyogi logo" className={`${sizeClass}  ${className}`} />
   );
 };
 
-Logo.defaultProps = {};
+Logo.defaultProps = {
+  allowRedirect: true,
+};
 
 export default React.memo(Logo);

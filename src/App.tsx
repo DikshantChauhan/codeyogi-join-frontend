@@ -22,11 +22,11 @@ import NotFoundPage from "./Pages/NotFound.Page";
 import { defaultUserContext, userContext } from "./Contexts/user.contextt";
 import { allowedRoutesContext, defaultAllowedRoutesContext } from "./Contexts/allowedRoutes.context";
 import { User } from "./Models/User";
-import CountdownPage from "./Pages/Countdown.Page";
 import ExamsPage from "./Pages/Exams.Page";
 import ExamInstructionsPage from "./Pages/ExamInstructions.Page";
 import MainExamPage from "./Pages/MainExamPage";
 import AppContainer from "./Components/AppContainer";
+import HomePage from "./Pages/Home.Page";
 
 interface AppProps {}
 
@@ -66,12 +66,6 @@ const App: FC<AppProps> = () => {
     );
   }
 
-  const homepageMap = {
-    passed: <h1>you passed {":)"}</h1>,
-    failed: <h1>you failed {":)"}</h1>,
-    skipped: <h1>you skipped your exam</h1>,
-  };
-
   return (
     <userContext.Provider value={userValue}>
       <allowedRoutesContext.Provider value={allowedRoutesValue}>
@@ -80,7 +74,7 @@ const App: FC<AppProps> = () => {
             <Route path={ROUTE_LOGIN} element={<SignInPage />} />
 
             <Route element={<AppContainer />}>
-              {user && <Route path={ROUTE_HOMEPAGE} element={user.status ? homepageMap[user.status] : <CountdownPage />} />}
+              {user && <Route path={ROUTE_HOMEPAGE} element={<HomePage />} />}
 
               <Route path={ROUTE_PROFILE} element={<CompleteProfilePage />} />
 

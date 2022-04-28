@@ -1,4 +1,4 @@
-import { FC, memo, useState } from "react";
+import { FC, memo, useEffect, useState } from "react";
 import Logo from "../Logo";
 import { GiHamburgerMenu } from "react-icons/gi";
 import Navlist from "./Navlist";
@@ -9,11 +9,25 @@ interface NavbarProps {}
 const Navbar: FC<NavbarProps> = ({}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth > 768) {
+        setIsMenuOpen(false);
+      }
+    }
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [window.innerWidth]);
+
   return (
     <nav className="border-gray-200 z-10 px-2 sm:px-4 py-2.5  bg-gray-800 w-full">
       <div className="flex flex-col flex-wrap items-center justify-between w-full mx-auto md:container sm:flex-row">
         <div className={`flex items-center justify-between w-full md:w-auto`}>
-          <Logo type="CodeYogiLogoEnglishWhite" size="lg" />
+          <Logo type="CodeYogiLogoEnglishWhite" size="lg" allowRedirect={false} />
 
           <button
             data-collapse-toggle="mobile-menu"
@@ -35,7 +49,7 @@ const Navbar: FC<NavbarProps> = ({}) => {
           <Navlist />
         </div>
 
-        <div className={`overflow-hidden w-full`}>
+        <div className={`overflow-hidden w-full md:hidden`}>
           <Transition
             className={`w-full  bg-gray-800 border-black`}
             show={isMenuOpen}
