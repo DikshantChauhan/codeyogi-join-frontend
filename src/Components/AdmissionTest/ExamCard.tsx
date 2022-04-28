@@ -1,9 +1,8 @@
 import { DateTime } from "luxon";
 import { FC, memo, useState } from "react";
+import { FaSpinner } from "react-icons/fa";
 import { scheduleTest } from "../../APIs/cloudFunctions.api";
 import { Exam } from "../../Models/Exam";
-import ListItemCard from "../ListItemCard";
-import ListItemCardButton from "../ListItemCardButton";
 
 interface ExamCardProps {
   exam: Exam;
@@ -27,13 +26,18 @@ const ExamCard: FC<ExamCardProps> = ({ exam, className }) => {
 
   const startDate = new Date(exam.start_at.seconds * 1000).toISOString();
   return (
-    <>
-      <ListItemCard heading={DateTime.fromISO(startDate).toLocaleString(DateTime.DATETIME_MED)} subheading={""} date={""} className={className}>
-        <ListItemCardButton isLoading={isLoading} onClick={handleScheduleClick} type="button">
-          Schedule
-        </ListItemCardButton>
-      </ListItemCard>
-    </>
+    <li className={`flex justify-between items-center pl-2 border-2 border-gray-100 bg-white rounded-lg shadow-lg list-none ${className}`}>
+      <h3 className="text-sm font-medium text-gray-900 truncate">
+        &nbsp; <span className="text-gray-500">{DateTime.fromISO(startDate).toLocaleString(DateTime.DATETIME_MED)}</span>
+      </h3>
+
+      <button
+        className={`p-3 bg-blue-600 hover:bg-blue-700 text-sm font-medium text-white border border-transparent rounded-br-lg`}
+        onClick={handleScheduleClick}
+      >
+        <span className="ml-1 sm:ml-3">{isLoading ? <FaSpinner className={`animate-spin text-black w-5 h-5 mx-auto`} /> : "Schedule"}</span>
+      </button>
+    </li>
   );
 };
 

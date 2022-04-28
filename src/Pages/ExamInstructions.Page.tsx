@@ -1,10 +1,10 @@
 import { memo, FC, useState, useEffect } from "react";
 import { Exam } from "../Models/Exam";
 import { addMinutes } from "date-fns";
-import CountDown from "../Components/AdmissionTest/CountDown";
 import { fetchSelectedExam } from "../APIs/exam.api";
 import { ROUTE_EXAM } from "../constants.routes";
 import { Link } from "react-router-dom";
+import CountDown from "../Components/CountDown";
 
 interface ExamInstructionsPageProps {}
 

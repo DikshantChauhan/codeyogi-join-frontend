@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState } from "react";
 import { BiTimeFive } from "react-icons/bi";
-import { secondsToHHMMSS } from "../../utils";
+import { secondsToHHMMSS } from "../utils";
 
 interface Props {
   className?: string;
@@ -26,12 +26,7 @@ export const CountDown: React.FC<Props> = ({ className, countdownFrom }) => {
     };
   }, []);
 
-  return (
-    <div className={`flex rounded-md items-center sm:px-3 sm:py-3 px-1 py-2 bg-blue-600 text-white justify-center ${className}`}>
-      <BiTimeFive className={`text-lg`} />
-      <p className={`ml-1`}>{timer}</p>
-    </div>
-  );
+  return <span className={`${className}`}>{timer}</span>;
 };
 
 CountDown.defaultProps = {};
