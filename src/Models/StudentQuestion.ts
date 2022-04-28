@@ -8,5 +8,5 @@ export interface StudentQuestion {
     D: string;
   };
   questionText: string;
-  selectedOption: StudentAnswerOptions;
+  answer: StudentAnswerOptions;
 }

@@ -57,5 +57,5 @@ export const submitExamQuestion = async (answer: StudentAnswerOptions) => {
   const questionSnapShort = await getDocs(questionQuery);
   const questionRef = questionSnapShort.docs[0].ref;
 
-  await setDoc(questionRef, { answer: answer }, { merge: true });
+  await setDoc(questionRef, { answer }, { merge: true });
 };
