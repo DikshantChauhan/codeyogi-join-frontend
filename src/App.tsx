@@ -1,5 +1,5 @@
 import { FC, memo, useEffect, useMemo, useState } from "react";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import {
   ROUTE_DEBUG,
   ROUTE_PROFILE,
@@ -97,16 +97,15 @@ const App: FC<AppProps> = () => {
 
                 <Route path={ROUTE_SLOTS} element={<ExamsPage />} />
 
-                {/* <Route path={ROUTE_EXAM_INSTRUCTIONS} element={<ExamInstructionsPage />} /> */}
+                <Route path={ROUTE_EXAM_INSTRUCTIONS} element={<ExamInstructionsPage />} />
 
                 <Route path={ROUTE_EXAM} element={<MainExamPage />} />
               </Route>
             </Route>
 
             <Route path={ROUTE_DEBUG} element={<DebugPage />} />
-            <Route path={ROUTE_EXAM_INSTRUCTIONS} element={<ExamInstructionsPage />} />
 
-            <Route path="*" element={<NotFoundPage />} />
+            <Route path="*" element={<Navigate to={ROUTE_FORWARD_SLASH}></Navigate>} />
           </Routes>
         </selectedExamContext.Provider>
       </allowedRoutesContext.Provider>

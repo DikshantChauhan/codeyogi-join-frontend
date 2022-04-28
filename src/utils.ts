@@ -50,6 +50,7 @@ export const isExamInstructionTimeStarted = (exam: Exam) => {
   const examStartedAt = new Date(exam.start_at.seconds * 1000);
   const examPreprationStartAt = subMinutes(examStartedAt, EXAM_INSTRUCTION_DURATION_IN_MINS);
 
+  console.log({ vsd: isPast(examPreprationStartAt) });
   if (isPast(examPreprationStartAt)) {
     return true;
   } else {
@@ -89,6 +90,15 @@ export const getExamInstructionTime = (exam: Exam) => {
   }
 };
 
+export const isStudentFinishedExamEarly = () => {
+  return false;
+};
+
+export const getResultTime = (exam: Exam) => {
+  const resultTime = addMinutes(new Date(exam.start_at.seconds * 1000), EXAM_DURATION_IN_MINS + 10);
+  return resultTime;
+};
+
 export let unsubMeObserver: Unsubscribe | undefined;
 
 export const handleAuthChanges = async (
@@ -120,34 +130,35 @@ export const handleAllowedRoutes = (
   const newAllowedRoutes = [];
   const currentRoute = window.location.pathname;
 
-  if (!user) {
-    newAllowedRoutes.push(ROUTE_LOGIN);
-  } else {
-    if (isStudentProfileComplete(user)) {
-      if (!user.selected_exam_id) {
-        newAllowedRoutes.push(ROUTE_SLOTS);
-      } else {
-        if (selectedExam) {
-          if (user.status) {
-            newAllowedRoutes.push(ROUTE_HOMEPAGE);
-          } else {
-            if (!isExamInstructionTimeStarted(selectedExam) && !isExamOver(selectedExam)) {
-              newAllowedRoutes.push(ROUTE_HOMEPAGE);
-            }
-          }
+  // "/login";
+  !user && newAllowedRoutes.push(ROUTE_LOGIN);
 
-          if (user.status === "skipped") {
-            newAllowedRoutes.push(ROUTE_SLOTS);
-          } else if (!user.exam_started_at && !isExamOver(selectedExam)) {
-            newAllowedRoutes.push(ROUTE_EXAM_INSTRUCTIONS);
-          } else if (user.exam_started_at && !isExamOver(selectedExam)) {
-            newAllowedRoutes.push(ROUTE_EXAM);
-          }
-        }
-      }
-    }
-    newAllowedRoutes.push(ROUTE_PROFILE);
-  }
+  // "/profile";
+  user && newAllowedRoutes.push(ROUTE_PROFILE);
+
+  // "/slots";
+  user && isStudentProfileComplete(user) && (!user.selected_exam_id || user.status === "skipped") && newAllowedRoutes.push(ROUTE_SLOTS);
+
+  // "/home"
+  user &&
+    isStudentProfileComplete(user) &&
+    user.selected_exam_id &&
+    (user.status || (selectedExam && (!isExamInstructionTimeStarted(selectedExam) || isExamOver(selectedExam) || isStudentFinishedExamEarly()))) &&
+    !user.exam_started_at &&
+    newAllowedRoutes.push(ROUTE_HOMEPAGE);
+
+  // "/exam/instructions";
+  user &&
+    isStudentProfileComplete(user) &&
+    user.selected_exam_id &&
+    selectedExam &&
+    isExamInstructionTimeStarted(selectedExam) &&
+    !isExamOver(selectedExam) &&
+    !user.exam_started_at &&
+    newAllowedRoutes.push(ROUTE_EXAM_INSTRUCTIONS);
+
+  // "/exam";
+  user && user.exam_started_at && selectedExam && !isExamOver(selectedExam) && newAllowedRoutes.push(ROUTE_EXAM);
 
   const check = [...newAllowedRoutes].sort().toString() === [...currentAllowedRoutes].sort().toString();
 

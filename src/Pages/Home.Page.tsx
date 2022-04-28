@@ -2,9 +2,11 @@ import { subMinutes } from "date-fns";
 import { memo, FC, useContext } from "react";
 import { Link, Navigate } from "react-router-dom";
 import CountDown from "../Components/CountDown";
+import NoticeText from "../Components/NoticeText";
 import { ROUTE_EXAM_INSTRUCTIONS, ROUTE_SLOTS } from "../constants.routes";
 import { selectedExamContext } from "../Contexts/selectedExam.context";
 import { userContext } from "../Contexts/user.contextt";
+import { getResultTime } from "../utils";
 
 interface HomePageProps {}
 
@@ -44,14 +46,13 @@ const HomePage: FC<HomePageProps> = ({}) => {
 
   //Selected exam id
   else if (user?.selected_exam_id) {
-    if (user.exam_started_at) {
-        //remove this in main exam screen:
-    //   const resultTime = selectedExam?.start_at && addMinutes(new Date(selectedExam.start_at.seconds * 1000), 70);
-    //   return (
-    //     <NoticeText>
-    //       <h1>Exam is going on. Your results will be published by ${resultTime?.toLocaleTimeString()}. </h1>
-    //     </NoticeText>
-    //   );
+    if (user?.exam_started_at) {
+      const resultTime = selectedExam && getResultTime(selectedExam);
+      return (
+        <NoticeText>
+          <h1>Exam is going on. Your results will be published by ${resultTime?.toLocaleTimeString()}. </h1>
+        </NoticeText>
+      );
     }
 
     const examStartedAt = selectedExam?.start_at.seconds ? new Date(selectedExam?.start_at?.seconds * 1000) : undefined;
@@ -69,6 +70,14 @@ const HomePage: FC<HomePageProps> = ({}) => {
           <span>Exam will start in</span>
           <CountDown countdownFrom={countDownFrom}></CountDown>
         </h1>
+      </div>
+    );
+  } else if (user?.exam_started_at) {
+    const resultTime = selectedExam && getResultTime(selectedExam);
+    return (
+      <div>
+        <h1>Sorry 😔</h1>
+        <h1>You Skipped the exam.</h1>
       </div>
     );
   }
