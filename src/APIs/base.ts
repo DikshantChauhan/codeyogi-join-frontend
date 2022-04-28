@@ -3,6 +3,8 @@ import axios from "axios";
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export const CURRENT_BATCH = "/batches/1";
 export const REDIRECT_URL = "redirect_url";
+export const EXAM_INSTRUCTION_DURATION_IN_MINS = 10
+export const EXAM_DURATION_IN_MINS = 60;
 
 axios.interceptors.request.use((config) => {
   return {

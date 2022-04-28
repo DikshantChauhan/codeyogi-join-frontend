@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { ROUTE_FORWARD_SLASH, ROUTE_LOGIN } from "../constants.routes";
+import { ROUTE_FORWARD_SLASH } from "../constants.routes";
 
 export const defaultAllowedRoutesContext: {
   allowedRoutes: string[];

@@ -1,5 +1,5 @@
 import { FC, memo, useEffect, useMemo, useState } from "react";
-import { Outlet, Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import {
   ROUTE_DEBUG,
   ROUTE_PROFILE,
@@ -27,14 +27,22 @@ import ExamInstructionsPage from "./Pages/ExamInstructions.Page";
 import MainExamPage from "./Pages/MainExamPage";
 import AppContainer from "./Components/AppContainer";
 import HomePage from "./Pages/Home.Page";
+import { selectedExamContext } from "./Contexts/selectedExam.context";
+import { Exam } from "./Models/Exam";
+import { fetchSelectedExam } from "./APIs/exam.api";
 
 interface AppProps {}
 
 const App: FC<AppProps> = () => {
   const [user, setUser] = useState<User | null>(defaultUserContext.user);
   const userValue = useMemo(() => ({ user, setUser }), [user]);
+
   const [allowedRoutes, setAllowedRoutes] = useState<string[]>(defaultAllowedRoutesContext.allowedRoutes);
   const allowedRoutesValue = useMemo(() => ({ allowedRoutes, setAllowedRoutes }), [allowedRoutes]);
+
+  const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
+  const selectedExamValue = useMemo(() => ({ selectedExam, setSelectedExam }), [selectedExam]);
+
   const [isUserFetching, setIsUserFetching] = useState(true);
   const navigate = useNavigate();
 
@@ -51,10 +59,18 @@ const App: FC<AppProps> = () => {
       const meQuery = query(collection(db, "users"), where("phone_no", "==", user.phone_no), limit(1));
 
       const unsubMeObserver = onSnapshot(meQuery, (doc) => {
-        handleMeChanges(doc, setUser, allowedRoutes, setAllowedRoutes, navigate);
+        handleMeChanges(doc, setUser, allowedRoutes, selectedExam, setAllowedRoutes, navigate);
       });
 
       return unsubMeObserver;
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user?.selected_exam_id) {
+      fetchSelectedExam().then((selectedExam) => {
+        selectedExam && setSelectedExam(selectedExam);
+      });
     }
   }, [user]);
 
@@ -69,27 +85,30 @@ const App: FC<AppProps> = () => {
   return (
     <userContext.Provider value={userValue}>
       <allowedRoutesContext.Provider value={allowedRoutesValue}>
-        <Routes>
-          <Route path={ROUTE_FORWARD_SLASH} element={<ProtectedRoutes />}>
-            <Route path={ROUTE_LOGIN} element={<SignInPage />} />
+        <selectedExamContext.Provider value={selectedExamValue}>
+          <Routes>
+            <Route path={ROUTE_FORWARD_SLASH} element={<ProtectedRoutes />}>
+              <Route path={ROUTE_LOGIN} element={<SignInPage />} />
 
-            <Route element={<AppContainer />}>
-              {user && <Route path={ROUTE_HOMEPAGE} element={<HomePage />} />}
+              <Route element={<AppContainer />}>
+                {user && <Route path={ROUTE_HOMEPAGE} element={<HomePage />} />}
 
-              <Route path={ROUTE_PROFILE} element={<CompleteProfilePage />} />
+                <Route path={ROUTE_PROFILE} element={<CompleteProfilePage />} />
 
-              <Route path={ROUTE_SLOTS} element={<ExamsPage />} />
+                <Route path={ROUTE_SLOTS} element={<ExamsPage />} />
+
+                {/* <Route path={ROUTE_EXAM_INSTRUCTIONS} element={<ExamInstructionsPage />} /> */}
+
+                <Route path={ROUTE_EXAM} element={<MainExamPage />} />
+              </Route>
             </Route>
-          </Route>
 
-          <Route path={ROUTE_DEBUG} element={<DebugPage />} />
+            <Route path={ROUTE_DEBUG} element={<DebugPage />} />
+            <Route path={ROUTE_EXAM_INSTRUCTIONS} element={<ExamInstructionsPage />} />
 
-          <Route path={ROUTE_EXAM_INSTRUCTIONS} element={<ExamInstructionsPage />} />
-
-          <Route path={ROUTE_EXAM} element={<MainExamPage />} />
-
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </selectedExamContext.Provider>
       </allowedRoutesContext.Provider>
     </userContext.Provider>
   );

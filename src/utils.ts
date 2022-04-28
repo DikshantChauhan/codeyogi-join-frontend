@@ -1,9 +1,21 @@
 import { User as FirebaseUser } from "@firebase/auth";
+import { addHours, isPast } from "date-fns";
+import { addMinutes, subMinutes } from "date-fns/esm";
 import { Unsubscribe, DocumentData, QuerySnapshot, doc } from "firebase/firestore";
 import { NavigateFunction } from "react-router-dom";
 import { authentication, db } from "../firebase-config";
 import { meFetchAPI } from "./APIs/auth.api";
-import { ROUTE_PROFILE, ROUTE_SLOTS, ROUTE_FORWARD_SLASH, ROUTE_LOGIN, ROUTE_HOMEPAGE } from "./constants.routes";
+import { EXAM_DURATION_IN_MINS, EXAM_INSTRUCTION_DURATION_IN_MINS } from "./APIs/base";
+import {
+  ROUTE_PROFILE,
+  ROUTE_SLOTS,
+  ROUTE_FORWARD_SLASH,
+  ROUTE_LOGIN,
+  ROUTE_HOMEPAGE,
+  ROUTE_EXAM_INSTRUCTIONS,
+  ROUTE_EXAM,
+} from "./constants.routes";
+import { Exam } from "./Models/Exam";
 import { User } from "./Models/User";
 
 const studentProfileFields = ["city_of_residence", "discovery_source", "email", "first_name", "last_name", "institute_name", "phone_no"];
@@ -22,6 +34,49 @@ export const secondsToHHMMSS = (secs: number) => {
     .map((v) => (v < 10 ? "0" + v : v))
     .filter((v, i) => v !== "00" || i > 0)
     .join(":");
+};
+
+export const isExamInstructionTimeStarted = (exam: Exam) => {
+  const examStartedAt = new Date(exam.start_at.seconds * 1000);
+  const examPreprationStartAt = subMinutes(examStartedAt, EXAM_INSTRUCTION_DURATION_IN_MINS);
+
+  if (isPast(examPreprationStartAt)) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+export const isExamStarted = (exam: Exam) => {
+  const examStartedAt = new Date(exam.start_at.seconds * 1000);
+
+  if (isPast(examStartedAt)) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+export const isExamOver = (exam: Exam) => {
+  const examStartedAt = new Date(exam.start_at.seconds * 1000);
+  const examEndAt = addMinutes(examStartedAt, EXAM_DURATION_IN_MINS);
+
+  if (isPast(examEndAt)) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+export const getExamInstructionTime = (exam: Exam) => {
+  const examStartedAt = new Date(exam.start_at.seconds * 1000);
+  const examEndAt = addMinutes(examStartedAt, EXAM_DURATION_IN_MINS);
+
+  if (isPast(examEndAt)) {
+    return true;
+  } else {
+    return false;
+  }
 };
 
 export let unsubMeObserver: Unsubscribe | undefined;
@@ -48,6 +103,7 @@ export const handleAuthChanges = async (
 export const handleAllowedRoutes = (
   user: User | null,
   currentAllowedRoutes: string[],
+  selectedExam: Exam | null,
   setAllowedRoutes: (routes: string[]) => void,
   navigate: NavigateFunction
 ) => {
@@ -61,19 +117,29 @@ export const handleAllowedRoutes = (
       if (!user.selected_exam_id) {
         newAllowedRoutes.push(ROUTE_SLOTS);
       } else {
-        if (user.status === "skipped") {
-          newAllowedRoutes.push(ROUTE_HOMEPAGE);
-          newAllowedRoutes.push(ROUTE_SLOTS);
-        } else {
-          newAllowedRoutes.push(ROUTE_HOMEPAGE);
+        if (selectedExam) {
+          if (user.status) {
+            newAllowedRoutes.push(ROUTE_HOMEPAGE);
+          } else {
+            if (!isExamInstructionTimeStarted(selectedExam) && !isExamOver(selectedExam)) {
+              newAllowedRoutes.push(ROUTE_HOMEPAGE);
+            }
+          }
+
+          if (user.status === "skipped") {
+            newAllowedRoutes.push(ROUTE_SLOTS);
+          } else if (!user.exam_started_at && !isExamOver(selectedExam)) {
+            newAllowedRoutes.push(ROUTE_EXAM_INSTRUCTIONS);
+          } else if (user.exam_started_at && !isExamOver(selectedExam)) {
+            newAllowedRoutes.push(ROUTE_EXAM);
+          }
         }
       }
     }
-
     newAllowedRoutes.push(ROUTE_PROFILE);
   }
 
-  const check = newAllowedRoutes.sort().toString() === currentAllowedRoutes.sort().toString();
+  const check = [...newAllowedRoutes].sort().toString() === [...currentAllowedRoutes].sort().toString();
 
   if (!check) {
     setAllowedRoutes(newAllowedRoutes);
@@ -88,6 +154,7 @@ export const handleMeChanges = (
   doc: QuerySnapshot<DocumentData>,
   setUser: (user: User | null) => void,
   currentAllowedRoutes: string[],
+  selectedExam: Exam | null,
   setAllowedRoutes: (routes: string[]) => void,
   navigate: NavigateFunction
 ) => {
@@ -102,7 +169,7 @@ export const handleMeChanges = (
     });
 
     if (changedUser) {
-      handleAllowedRoutes(changedUser, currentAllowedRoutes, setAllowedRoutes, navigate);
+      handleAllowedRoutes(changedUser, currentAllowedRoutes, selectedExam, setAllowedRoutes, navigate);
     }
   }, 1500);
 };

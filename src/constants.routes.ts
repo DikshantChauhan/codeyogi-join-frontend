@@ -8,7 +8,9 @@ export const ROUTE_EXAM_INSTRUCTIONS = "/exam/instructions";
 export const ROUTE_EXAM = "/exam";
 
 export const NAVBAR_NAMES: { [key: string]: string } = {
-  "/profile": "Profile",
-  "/home": "Home",
-  "/slots": "Schedule Exam",
+  [ROUTE_PROFILE]: "Profile",
+  [ROUTE_HOMEPAGE]: "Home",
+  [ROUTE_SLOTS]: "Schedule Exam",
+  [ROUTE_EXAM_INSTRUCTIONS]: "Exam",
+  [ROUTE_EXAM]: "Exam",
 };

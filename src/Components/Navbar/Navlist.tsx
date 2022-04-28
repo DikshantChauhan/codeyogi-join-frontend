@@ -1,7 +1,7 @@
 import { FC, memo, useContext } from "react";
 import { NavLink } from "react-router-dom";
 import { signOut } from "../../APIs/auth.api";
-import { NAVBAR_NAMES, ROUTE_PROFILE } from "../../constants.routes";
+import { NAVBAR_NAMES } from "../../constants.routes";
 import { allowedRoutesContext } from "../../Contexts/allowedRoutes.context";
 import { userContext } from "../../Contexts/user.contextt";
 
