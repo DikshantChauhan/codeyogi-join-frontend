@@ -25,15 +25,25 @@ export const isStudentProfileComplete = (user: User | null) => {
   return studentProfileFields.every((field) => !!user[field as keyof User]);
 };
 
-export const secondsToHHMMSS = (secs: number) => {
-  var hours = Math.floor(secs / 3600);
-  var minutes = Math.floor(secs / 60) % 60;
-  var seconds = secs % 60;
+export const secondsToHHMMSS = (seconds: number) => {
+  let hours: number | string = Math.floor(seconds / 3600);
+  let minutes: number | string = Math.floor((seconds - hours * 3600) / 60);
+  seconds = seconds - hours * 3600 - minutes * 60;
+  let secondsString = seconds.toString();
 
-  return [hours, minutes, seconds]
-    .map((v) => (v < 10 ? "0" + v : v))
-    .filter((v, i) => v !== "00" || i > 0)
-    .join(":");
+  if (hours < 10) {
+    hours = "0" + hours;
+  }
+  if (minutes < 10) {
+    minutes = "0" + minutes;
+  }
+  if (seconds < 10) {
+    secondsString = "0" + seconds;
+  }
+
+  let time = hours + ":" + minutes + ":" + secondsString;
+
+  return time;
 };
 
 export const isExamInstructionTimeStarted = (exam: Exam) => {
