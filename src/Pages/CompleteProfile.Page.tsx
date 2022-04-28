@@ -71,7 +71,6 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
       }
 
       setIsLoading((loading) => !loading);
-      navigate(ROUTE_SLOTS);
     },
   });
 

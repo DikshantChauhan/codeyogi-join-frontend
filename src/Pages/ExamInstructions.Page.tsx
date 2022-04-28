@@ -1,50 +1,47 @@
 import { memo, FC, useContext } from "react";
 import { ROUTE_EXAM, ROUTE_HOMEPAGE } from "../constants.routes";
 import { Link, Navigate } from "react-router-dom";
-import CountDown from "../Components/CountDown";
 import { selectedExamContext } from "../Contexts/selectedExam.context";
-import { isExamInstructionTimeStarted, isExamOver, isExamStarted } from "../utils";
+import { HHMMSSToSeconds, isExamOver } from "../utils";
+import MDEditor from "@uiw/react-md-editor";
+import { useCountdown } from "../Hooks/Countdown";
 
 interface ExamInstructionsPageProps {}
 
 const ExamInstructionsPage: FC<ExamInstructionsPageProps> = () => {
   const { selectedExam } = useContext(selectedExamContext);
+  const examStartTime = new Date(selectedExam!.start_at?.seconds * 1000);
 
-  if (!selectedExam) {
-    return <h1>Loading...</h1>;
-  }
-  const examStartTime = new Date(selectedExam.start_at?.seconds * 1000);
+  const timer = useCountdown(examStartTime);
+  const secondsLeft = HHMMSSToSeconds(timer);
+  return (
+    <div className="h-screen px-4 py-4 mt-2 bg-gray-50 sm:px-6 lg:px-8">
+      <MDEditor.Markdown
+        prefixCls="bg-gray-50"
+        source="***some markdown text here*** 
+        >``` 1. Lorem ipsum dolor sit amet consectetur adipisicing elit. Vero voluptatem totam dicta iure ratione harum repellendus facere possimus```
+        ----------
+        2. laudantium iusto ducimus itaque quibusdam deleniti explicabo dolores animi ex earum voluptatem delectus rerum odio perspiciatis? Molestias aspernatur voluptatibus, 
+        - _3. dicta exercitationem error dolores sit tenetur corporis ipsum earum aliquid._
+        - ~~some markdown text here~~"
+      />
 
-  const handleCase = () => {
-    if (isExamInstructionTimeStarted(selectedExam) && !isExamStarted(selectedExam)) {
-      return (
-        <div>
+      <div className={`ml-auto w-fit border border-indigo-500 p-2 border-opacity-25 rounded-md`}>
+        {secondsLeft ? (
           <h1>
             <span>Exam will start in </span>
-            <CountDown countdownFrom={examStartTime} />
+            <span>{timer}</span>
           </h1>
-        </div>
-      );
-    } else if (isExamStarted(selectedExam) && !isExamOver(selectedExam)) {
-      return (
-        <div>
-          <h1>Exam is going on</h1>
-          <Link to={ROUTE_EXAM}>Enter</Link>
-        </div>
-      );
-    } else {
-      return <Navigate to={ROUTE_HOMEPAGE}></Navigate>;
-    }
-  };
-
-  return (
-    <div className="flex items-center justify-center px-4 py-4 mt-2 bg-gray-50 sm:px-6 lg:px-8">
-      <div className="flex flex-col text-center items-center flex-wrap w-full mx-auto space-x-2 space-y-2 ">
-        <h1>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi tempora mollitia vero perspiciatis sint voluptatum quas in ratione facilis
-          cum.
-        </h1>
-        {handleCase()}
+        ) : isExamOver(selectedExam!) ? (
+          <Navigate to={ROUTE_HOMEPAGE} />
+        ) : (
+          <div>
+            <h1>Exam is going on</h1>
+            <Link className={`underline text-indigo-500 font-semibold`} to={ROUTE_EXAM}>
+              Enter
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

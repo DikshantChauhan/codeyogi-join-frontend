@@ -16,6 +16,7 @@ const Navlist: FC<NavlistProps> = ({}) => {
       {allowedRoutes.map((route) => {
         return (
           <NavLink
+            key={route}
             to={route}
             className={({ isActive }) =>
               `block py-2 pl-3 pr-4 ${
@@ -36,7 +37,7 @@ const Navlist: FC<NavlistProps> = ({}) => {
             await signOut();
             window.location.reload();
           }}
-          className="block text-left py-2 pl-3 pr-4 text-red-400 border-b border-gray-700 md:border-0 md:p-0 md:hover:text-red-600 hover:bg-gray-700 hover:text-red-600 md:hover:bg-transparent w-30"
+          className="block py-2 pl-3 pr-4 text-left text-red-400 border-b border-gray-700 md:border-0 md:p-0 md:hover:text-red-600 hover:bg-gray-700 hover:text-red-600 md:hover:bg-transparent w-30"
         >
           Logout
         </button>

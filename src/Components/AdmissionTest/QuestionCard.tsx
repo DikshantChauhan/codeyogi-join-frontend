@@ -9,7 +9,7 @@ import { StudentAnswerOptions, StudentQuestion } from "../../Models/StudentQuest
 interface QuestioinCardProps {
   admissionQuestion: StudentQuestion;
   isSubmitting: boolean;
-  trySubmit: (answer: StudentAnswerOptions) => void;
+  trySubmit: (answer: StudentAnswerOptions) => Promise<void>;
 }
 
 const QuestionCard: FC<QuestioinCardProps> = ({ admissionQuestion, isSubmitting, trySubmit }) => {
@@ -18,8 +18,8 @@ const QuestionCard: FC<QuestioinCardProps> = ({ admissionQuestion, isSubmitting,
 
     validationSchema: yup.object().shape({ userAnswer: yup.string().required() }),
 
-    onSubmit: (data) => {
-      trySubmit(data.userAnswer);
+    onSubmit: async (data) => {
+      await trySubmit(data.userAnswer);
       formik.setValues(formik.initialValues);
     },
     // validateOnMount: true,

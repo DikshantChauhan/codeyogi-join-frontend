@@ -1,10 +1,10 @@
 import { subMinutes } from "date-fns";
 import { memo, FC, useContext } from "react";
 import { Link, Navigate } from "react-router-dom";
-import CountDown from "../Components/CountDown";
 import { ROUTE_EXAM_INSTRUCTIONS, ROUTE_SLOTS } from "../constants.routes";
 import { selectedExamContext } from "../Contexts/selectedExam.context";
 import { userContext } from "../Contexts/user.contextt";
+import { useCountdown } from "../Hooks/Countdown";
 
 interface HomePageProps {}
 
@@ -45,13 +45,13 @@ const HomePage: FC<HomePageProps> = ({}) => {
   //Selected exam id
   else if (user?.selected_exam_id) {
     if (user.exam_started_at) {
-        //remove this in main exam screen:
-    //   const resultTime = selectedExam?.start_at && addMinutes(new Date(selectedExam.start_at.seconds * 1000), 70);
-    //   return (
-    //     <NoticeText>
-    //       <h1>Exam is going on. Your results will be published by ${resultTime?.toLocaleTimeString()}. </h1>
-    //     </NoticeText>
-    //   );
+      //remove this in main exam screen:
+      //   const resultTime = selectedExam?.start_at && addMinutes(new Date(selectedExam.start_at.seconds * 1000), 70);
+      //   return (
+      //     <NoticeText>
+      //       <h1>Exam is going on. Your results will be published by ${resultTime?.toLocaleTimeString()}. </h1>
+      //     </NoticeText>
+      //   );
     }
 
     const examStartedAt = selectedExam?.start_at.seconds ? new Date(selectedExam?.start_at?.seconds * 1000) : undefined;
@@ -63,11 +63,14 @@ const HomePage: FC<HomePageProps> = ({}) => {
     if (countDownFrom <= new Date()) {
       return <Navigate to={ROUTE_EXAM_INSTRUCTIONS} />;
     }
+
+    const timer = useCountdown(countDownFrom);
+
     return (
       <div>
         <h1>
           <span>Exam will start in</span>
-          <CountDown countdownFrom={countDownFrom}></CountDown>
+          <span>{timer}</span>
         </h1>
       </div>
     );

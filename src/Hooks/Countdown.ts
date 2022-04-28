@@ -1,13 +1,7 @@
-import React, { memo, useEffect, useState } from "react";
-import { BiTimeFive } from "react-icons/bi";
+import { useState, useEffect } from "react";
 import { secondsToHHMMSS } from "../utils";
 
-interface Props {
-  className?: string;
-  countdownFrom: Date;
-}
-
-export const CountDown: React.FC<Props> = ({ className, countdownFrom }) => {
+export const useCountdown = (countdownFrom: Date) => {
   const [timer, setTimer] = useState("00:00:00");
 
   useEffect(() => {
@@ -26,9 +20,5 @@ export const CountDown: React.FC<Props> = ({ className, countdownFrom }) => {
     };
   }, []);
 
-  return <span className={`${className}`}>{timer}</span>;
+  return timer;
 };
-
-CountDown.defaultProps = {};
-
-export default memo(CountDown);

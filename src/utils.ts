@@ -46,7 +46,7 @@ export const secondsToHHMMSS = (seconds: number) => {
   return time;
 };
 
-export const isExamInstructionTimeStarted = (exam: Exam) => {
+export const hasExamInstructionTimeStarted = (exam: Exam) => {
   const examStartedAt = new Date(exam.start_at.seconds * 1000);
   const examPreprationStartAt = subMinutes(examStartedAt, EXAM_INSTRUCTION_DURATION_IN_MINS);
 
@@ -57,7 +57,7 @@ export const isExamInstructionTimeStarted = (exam: Exam) => {
   }
 };
 
-export const isExamStarted = (exam: Exam) => {
+export const hasExamStarted = (exam: Exam) => {
   const examStartedAt = new Date(exam.start_at.seconds * 1000);
 
   if (isPast(examStartedAt)) {
@@ -131,7 +131,7 @@ export const handleAllowedRoutes = (
           if (user.status) {
             newAllowedRoutes.push(ROUTE_HOMEPAGE);
           } else {
-            if (!isExamInstructionTimeStarted(selectedExam) && !isExamOver(selectedExam)) {
+            if (!hasExamInstructionTimeStarted(selectedExam) && !isExamOver(selectedExam)) {
               newAllowedRoutes.push(ROUTE_HOMEPAGE);
             }
           }
@@ -191,4 +191,18 @@ export const getMeDocRef = () => {
   const meDocRef = doc(db, "users", currentUser.uid);
 
   return meDocRef;
+};
+
+export const HHMMSSToSeconds = (time: string) => {
+  const chunks = time.split(":").map((ch) => +ch);
+
+  if (chunks.length !== 3) {
+    throw "Format should be HH:MM:SS";
+  } else if (chunks.some((el) => Number.isNaN(el))) {
+    throw "Each section should be a number";
+  }
+
+  const timeInSeconds = chunks[0] * 60 * 60 + chunks[1] * 60 + chunks[2];
+
+  return timeInSeconds;
 };

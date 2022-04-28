@@ -1,4 +1,4 @@
-import { collection, getDoc, getDocs, limit, query, setDoc, where } from "firebase/firestore";
+import { collection, getDoc, getDocs, limit, orderBy, query, setDoc, where } from "firebase/firestore";
 import { authentication, db } from "../../firebase-config";
 import { Exam } from "../Models/Exam";
 import { StudentAnswerOptions, StudentQuestion } from "../Models/StudentQuestion";
@@ -39,7 +39,7 @@ export const fetchExamQuestion = async () => {
   if (!authentication.currentUser) return;
 
   const usersQuestionsCollectionref = collection(db, "users", authentication.currentUser.uid, "questions");
-  const questionQuery = query(usersQuestionsCollectionref, where("answer", "==", null), limit(1));
+  const questionQuery = query(usersQuestionsCollectionref, where("answer", "==", null), limit(1), orderBy("id"));
   const questionSnapShort = await getDocs(questionQuery);
 
   if (questionSnapShort.empty) return;

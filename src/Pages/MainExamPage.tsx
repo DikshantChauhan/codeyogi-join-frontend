@@ -1,8 +1,11 @@
-import { memo, FC, useState, useEffect, useCallback } from "react";
+import { addMinutes } from "date-fns";
+import { memo, FC, useState, useEffect, useCallback, useContext } from "react";
 import { Navigate } from "react-router";
 import { fetchExamQuestion, submitExamQuestion } from "../APIs/exam.api";
 import QuestionCard from "../Components/AdmissionTest/QuestionCard";
 import { ROUTE_HOMEPAGE } from "../constants.routes";
+import { selectedExamContext } from "../Contexts/selectedExam.context";
+import { useCountdown } from "../Hooks/Countdown";
 import { StudentAnswerOptions, StudentQuestion } from "../Models/StudentQuestion";
 
 interface MainExamPageProps {}
@@ -14,6 +17,10 @@ const MainExamPage: FC<MainExamPageProps> = () => {
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState("");
   const [admissionQuestions, setAdmissionQuestions] = useState<StudentQuestion[]>([]);
+  const { selectedExam } = useContext(selectedExamContext);
+  const selectedExamOverTime = addMinutes(new Date(selectedExam!.start_at.seconds * 1000), 60);
+
+  const timer = useCountdown(selectedExamOverTime);
 
   const handleRef = useCallback((node) => {
     if (node !== null) {
@@ -32,34 +39,34 @@ const MainExamPage: FC<MainExamPageProps> = () => {
     }, 500);
   };
 
-  const handleSubmit = (answer: StudentAnswerOptions) => {
+  const handleSubmit = async (answer: StudentAnswerOptions) => {
     setIssubmitting(true);
     setError("");
-    submitExamQuestion(answer)
-      .then(() => {
-        setIssubmitting(false);
+    try {
+      await submitExamQuestion(answer);
+    } catch (error) {
+      setError("Unable to Submit your answer! please try again.");
+      return;
+    }
 
-        setIsFetching(true);
-        setError("");
-        fetchExamQuestion()
-          .then((response) => {
-            if (!response) {
-              setAdmissionQuestions([]);
-            } else {
-              setAdmissionQuestions([...admissionQuestions, response]);
-              handleSlide([...admissionQuestions, response]);
-            }
-            setIsFetching(false);
-          })
-          .catch(() => {
-            setError("Unable to fetch question! please try again.");
-          });
-      })
-      .catch((error) => {
-        setIssubmitting(false);
-        setError("Unable to Submit your answer! please try again.");
-        console.error(error);
-      });
+    setIssubmitting(false);
+
+    setIsFetching(true);
+
+    try {
+      const newQuestion = await fetchExamQuestion();
+      if (!newQuestion) {
+        setAdmissionQuestions([]);
+      } else {
+        setAdmissionQuestions([...admissionQuestions, newQuestion]);
+        handleSlide([...admissionQuestions, newQuestion]);
+      }
+    } catch (error) {
+      setError("Unable to fetch question! please try again.");
+      return;
+    }
+
+    setIsFetching(false);
   };
 
   useEffect(() => {
@@ -79,16 +86,19 @@ const MainExamPage: FC<MainExamPageProps> = () => {
       });
   }, []);
 
-  return (
+  return !isFetching && admissionQuestions.length === 0 ? (
+    <Navigate to={ROUTE_HOMEPAGE} />
+  ) : (
     <div>
-      {!isFetching && admissionQuestions.length === 0 ? (
-        <Navigate to={ROUTE_HOMEPAGE} />
-      ) : (
-        <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen">
+        <div className={`absolute top-5 right-5 p-2 border border-indigo-500 text-indigo-500 rounded-md`}>{timer}</div>
+
+        <div className={`flex flex-col`}>
           <div style={{ height: `${selectedIteamHeight}px` }}>
             {admissionQuestions.map((question, index) => {
               const ref = index === 0 ? handleRef : null;
               const marginTop = index === 0 && isAnimating && `-${selectedIteamHeight}px`;
+
               return (
                 <div
                   ref={ref}
@@ -101,8 +111,9 @@ const MainExamPage: FC<MainExamPageProps> = () => {
               );
             })}
           </div>
+          {error && <p className={`text-red-600`}> error {error}</p>}
         </div>
-      )}
+      </div>
     </div>
   );
 };
