@@ -134,39 +134,6 @@ export const handleAllowedRoutes = (
   const newAllowedRoutes: string[] = [];
   const currentRoute = window.location.pathname;
 
-  // // "/login";
-  // !user && newAllowedRoutes.push(ROUTE_LOGIN);
-
-  // // "/exam";
-  // user && user.exam_started_at && selectedExam && !isExamOver(selectedExam) && newAllowedRoutes.push(ROUTE_EXAM);
-
-  // // "/exam/instructions";
-  // user &&
-  //   isStudentProfileComplete(user) &&
-  //   user.selected_exam_id &&
-  //   selectedExam &&
-  //   isExamInstructionTimeStarted(selectedExam) &&
-  //   !isExamOver(selectedExam) &&
-  //   !user.exam_started_at &&
-  //   newAllowedRoutes.push(ROUTE_EXAM_INSTRUCTIONS);
-
-  // // "/home"
-  // user &&
-  //   isStudentProfileComplete(user) &&
-  //   user.selected_exam_id &&
-  //   (user.status ||
-  //     (selectedExam &&
-  //       (!isExamInstructionTimeStarted(selectedExam) ||
-  //         isExamOver(selectedExam) ||
-  //         isStudentFinishedExamEarly(isQuestionFetchable, selectedExam)))) &&
-  //   newAllowedRoutes.push(ROUTE_HOMEPAGE);
-
-  // // "/slots";
-  // user && isStudentProfileComplete(user) && (!user.selected_exam_id || user.status === "skipped") && newAllowedRoutes.push(ROUTE_SLOTS);
-
-  // // "/profile";
-  // user && newAllowedRoutes.push(ROUTE_PROFILE);
-
   if (!user) {
     newAllowedRoutes.push(ROUTE_LOGIN);
   } else if (!isStudentProfileComplete(user)) {
@@ -179,7 +146,6 @@ export const handleAllowedRoutes = (
   } else if (user.status) {
     newAllowedRoutes.push(ROUTE_HOMEPAGE);
   } else if (selectedExam) {
-
     if (!hasExamInstructionTimeStarted(selectedExam)) {
       newAllowedRoutes.push(ROUTE_HOMEPAGE);
     } else if (hasStudentFinishedExamEarly(isQuestionFetchable, selectedExam) || isExamOver(selectedExam)) {
@@ -269,3 +235,5 @@ export const generateRecaptcha = (containerOrId: string | HTMLElement, success?:
     authentication
   );
 };
+
+// export const canSubmitAnwer = (id:number,examStartedAt:)

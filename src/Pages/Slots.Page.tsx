@@ -4,9 +4,9 @@ import ExamGrid from "../Components/AdmissionTest/ExamGrid";
 import NoticeText from "../Components/NoticeText";
 import { Exam } from "../Models/Exam";
 
-interface ExamsProps {}
+interface SlotsProps {}
 
-const Exams: FC<ExamsProps> = ({}) => {
+const Slots: FC<SlotsProps> = ({}) => {
   const [exams, setExams] = useState<Exam[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -37,4 +37,4 @@ const Exams: FC<ExamsProps> = ({}) => {
   );
 };
 
-export default memo(Exams);
+export default memo(Slots);
