@@ -210,16 +210,22 @@ export const handleMeChanges = async (
   selectedExam: Exam | null,
   setAllowedRoutes: (routes: string[]) => void,
   navigate: NavigateFunction,
+  setSelectedExam: (user: Exam | null) => void,
+  setIsSelectedExamFetching: (isLoadin: boolean) => void,
   isQuestionFetchable: boolean
 ) => {
   let changedUser: User | null = null;
+  let exam: Exam | null = null;
 
   if (!doc.metadata.hasPendingWrites) {
     changedUser = doc.data() as User | null;
+    exam = (await fetchSelectedExamAPI()) || null;
+
+    setSelectedExam(exam);
+    setIsSelectedExamFetching(false);
     setUser(changedUser as User);
   }
 
-  if (changedUser?.selected_exam_id) await fetchSelectedExamAPI();
   if (changedUser) {
     handleAllowedRoutes(changedUser, currentAllowedRoutes, selectedExam, setAllowedRoutes, navigate, isQuestionFetchable);
   }

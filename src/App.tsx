@@ -52,18 +52,12 @@ const App: FC<AppProps> = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const unsubAuthObserver = onAuthStateChanged(authentication, (me) => {
-      handleAuthChanges(me, setUser, setIsUserFetching);
-      setIsSelectedExamFetching(true);
-      fetchSelectedExamAPI()
-        .then((selectedExam) => {
-          if (selectedExam) {
-            setSelectedExam(selectedExam);
-          }
-        })
-        .finally(() => {
-          setIsSelectedExamFetching(false);
-        });
+    const unsubAuthObserver = onAuthStateChanged(authentication, async (me) => {
+      await handleAuthChanges(me, setUser, setIsUserFetching);
+      const exam = await fetchSelectedExamAPI();
+
+      setSelectedExam(exam || null);
+      setIsSelectedExamFetching(false);
     });
 
     return unsubAuthObserver;
@@ -75,7 +69,17 @@ const App: FC<AppProps> = () => {
     if (!meDocRef) return;
 
     const unsubMeObserver = onSnapshot(meDocRef, async (doc) => {
-      await handleMeChanges(doc, setUser, allowedRoutes, selectedExam, setAllowedRoutes, navigate, isQuestionFetchable);
+      await handleMeChanges(
+        doc,
+        setUser,
+        allowedRoutes,
+        selectedExam,
+        setAllowedRoutes,
+        navigate,
+        setSelectedExam,
+        setIsSelectedExamFetching,
+        isQuestionFetchable
+      );
     });
 
     return unsubMeObserver;
