@@ -59,6 +59,11 @@ const HomePage: FC<HomePageProps> = ({}) => {
     );
   }
 
+  //exam over, result not posted, exam_start_at = null
+  else if (selectedExam && isExamOver(selectedExam) && !user?.exam_started_at) {
+    return <h1>Tou didnt enter in exam, you will be able to re-pick slots once result for this exam is published</h1>;
+  }
+
   //Exam over
   else if (selectedExam && isExamOver(selectedExam)) {
     return <h1>Your results will be published by {resultTime}</h1>;
@@ -72,8 +77,6 @@ const HomePage: FC<HomePageProps> = ({}) => {
       </div>
     );
   }
-
-  //exam over, result not posted, exam_start_at = null
   
   return <></>;
 };

@@ -179,9 +179,12 @@ export const handleAllowedRoutes = (
   } else if (user.status) {
     newAllowedRoutes.push(ROUTE_HOMEPAGE);
   } else if (selectedExam) {
+
     if (!hasExamInstructionTimeStarted(selectedExam)) {
       newAllowedRoutes.push(ROUTE_HOMEPAGE);
-    } else if (!user.exam_started_at && !isExamOver(selectedExam)) {
+    } else if (hasStudentFinishedExamEarly(isQuestionFetchable, selectedExam) || isExamOver(selectedExam)) {
+      newAllowedRoutes.push(ROUTE_HOMEPAGE);
+    } else if (!user.exam_started_at) {
       newAllowedRoutes.push(ROUTE_EXAM_INSTRUCTIONS);
     } else {
       newAllowedRoutes.push(ROUTE_EXAM);
