@@ -48,8 +48,13 @@ export const secondsToHHMMSS = (seconds: number) => {
   return time;
 };
 
-export const hasExamInstructionTimeStarted = (exam: Exam) => {
+export const getExamStartAt = (exam: Exam) => {
   const examStartedAt = new Date(exam.start_at.seconds * 1000);
+  return examStartedAt;
+};
+
+export const hasExamInstructionTimeStarted = (exam: Exam) => {
+  const examStartedAt = getExamStartAt(exam);
   const examPreprationStartAt = subMinutes(examStartedAt, EXAM_INSTRUCTION_DURATION_IN_MINS);
 
   if (isPast(examPreprationStartAt)) {
@@ -60,7 +65,7 @@ export const hasExamInstructionTimeStarted = (exam: Exam) => {
 };
 
 export const hasExamStarted = (exam: Exam) => {
-  const examStartedAt = new Date(exam.start_at.seconds * 1000);
+  const examStartedAt = getExamStartAt(exam);
 
   if (isPast(examStartedAt)) {
     return true;
@@ -70,7 +75,7 @@ export const hasExamStarted = (exam: Exam) => {
 };
 
 export const isExamOver = (exam: Exam) => {
-  const examStartedAt = new Date(exam.start_at.seconds * 1000);
+  const examStartedAt = getExamStartAt(exam);
   const examEndAt = addMinutes(examStartedAt, EXAM_DURATION_IN_MINS);
 
   if (isPast(examEndAt)) {
@@ -80,23 +85,20 @@ export const isExamOver = (exam: Exam) => {
   }
 };
 
-export const getExamInstructionTime = (exam: Exam) => {
-  const examStartedAt = new Date(exam.start_at.seconds * 1000);
-  const examEndAt = addMinutes(examStartedAt, EXAM_DURATION_IN_MINS);
-
-  if (isPast(examEndAt)) {
-    return true;
-  } else {
-    return false;
-  }
+export const getExamInstructionTimeStartedAt = (exam: Exam) => {
+  const examInstructionTimeStartedAt = subMinutes(getExamStartAt(exam), EXAM_INSTRUCTION_DURATION_IN_MINS);
+  return examInstructionTimeStartedAt;
 };
 
-export const hasStudentFinishedExamEarly = () => {
+export const hasStudentFinishedExamEarly = (isQuestionFetchable: boolean, exam: Exam) => {
+  if (!isExamOver(exam) && isQuestionFetchable) {
+    return true;
+  }
   return false;
 };
 
 export const getResultTime = (exam: Exam) => {
-  const resultTime = addMinutes(new Date(exam.start_at.seconds * 1000), EXAM_DURATION_IN_MINS + 10);
+  const resultTime = addMinutes(getExamStartAt(exam), EXAM_DURATION_IN_MINS + 10);
   return resultTime;
 };
 
@@ -126,10 +128,44 @@ export const handleAllowedRoutes = (
   currentAllowedRoutes: string[],
   selectedExam: Exam | null,
   setAllowedRoutes: (routes: string[]) => void,
-  navigate: NavigateFunction
+  navigate: NavigateFunction,
+  isQuestionFetchable: boolean
 ) => {
   const newAllowedRoutes: string[] = [];
   const currentRoute = window.location.pathname;
+
+  // // "/login";
+  // !user && newAllowedRoutes.push(ROUTE_LOGIN);
+
+  // // "/exam";
+  // user && user.exam_started_at && selectedExam && !isExamOver(selectedExam) && newAllowedRoutes.push(ROUTE_EXAM);
+
+  // // "/exam/instructions";
+  // user &&
+  //   isStudentProfileComplete(user) &&
+  //   user.selected_exam_id &&
+  //   selectedExam &&
+  //   isExamInstructionTimeStarted(selectedExam) &&
+  //   !isExamOver(selectedExam) &&
+  //   !user.exam_started_at &&
+  //   newAllowedRoutes.push(ROUTE_EXAM_INSTRUCTIONS);
+
+  // // "/home"
+  // user &&
+  //   isStudentProfileComplete(user) &&
+  //   user.selected_exam_id &&
+  //   (user.status ||
+  //     (selectedExam &&
+  //       (!isExamInstructionTimeStarted(selectedExam) ||
+  //         isExamOver(selectedExam) ||
+  //         isStudentFinishedExamEarly(isQuestionFetchable, selectedExam)))) &&
+  //   newAllowedRoutes.push(ROUTE_HOMEPAGE);
+
+  // // "/slots";
+  // user && isStudentProfileComplete(user) && (!user.selected_exam_id || user.status === "skipped") && newAllowedRoutes.push(ROUTE_SLOTS);
+
+  // // "/profile";
+  // user && newAllowedRoutes.push(ROUTE_PROFILE);
 
   if (!user) {
     newAllowedRoutes.push(ROUTE_LOGIN);
@@ -140,10 +176,12 @@ export const handleAllowedRoutes = (
   } else if (user.status === "skipped") {
     newAllowedRoutes.push(ROUTE_HOMEPAGE);
     newAllowedRoutes.push(ROUTE_SLOTS);
+  } else if (user.status) {
+    newAllowedRoutes.push(ROUTE_HOMEPAGE);
   } else if (selectedExam) {
     if (!hasExamInstructionTimeStarted(selectedExam)) {
       newAllowedRoutes.push(ROUTE_HOMEPAGE);
-    } else if (!user.exam_started_at) {
+    } else if (!user.exam_started_at && !isExamOver(selectedExam)) {
       newAllowedRoutes.push(ROUTE_EXAM_INSTRUCTIONS);
     } else {
       newAllowedRoutes.push(ROUTE_EXAM);
@@ -171,7 +209,8 @@ export const handleMeChanges = async (
   currentAllowedRoutes: string[],
   selectedExam: Exam | null,
   setAllowedRoutes: (routes: string[]) => void,
-  navigate: NavigateFunction
+  navigate: NavigateFunction,
+  isQuestionFetchable: boolean
 ) => {
   let changedUser: User | null = null;
 
@@ -182,7 +221,7 @@ export const handleMeChanges = async (
 
   if (changedUser?.selected_exam_id) await fetchSelectedExamAPI();
   if (changedUser) {
-    handleAllowedRoutes(changedUser, currentAllowedRoutes, selectedExam, setAllowedRoutes, navigate);
+    handleAllowedRoutes(changedUser, currentAllowedRoutes, selectedExam, setAllowedRoutes, navigate, isQuestionFetchable);
   }
 };
 

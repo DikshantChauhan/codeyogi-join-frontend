@@ -1,8 +1,8 @@
 import { memo, FC, useContext } from "react";
-import { ROUTE_EXAM, ROUTE_HOMEPAGE } from "../constants.routes";
-import { Link, Navigate } from "react-router-dom";
+import { ROUTE_HOMEPAGE } from "../constants.routes";
+import { Navigate } from "react-router-dom";
 import { selectedExamContext } from "../Contexts/selectedExam.context";
-import { HHMMSSToSeconds, isExamOver } from "../utils";
+import { getExamStartAt, HHMMSSToSeconds, isExamOver } from "../utils";
 import MDEditor from "@uiw/react-md-editor";
 import { useCountdown } from "../Hooks/Countdown";
 import Button from "../Components/Button";
@@ -12,7 +12,7 @@ interface ExamInstructionsPageProps {}
 
 const ExamInstructionsPage: FC<ExamInstructionsPageProps> = () => {
   const { selectedExam } = useContext(selectedExamContext);
-  const examStartTime = new Date(selectedExam!.start_at?.seconds * 1000);
+  const examStartTime = getExamStartAt(selectedExam!);
 
   const timer = useCountdown(examStartTime);
   const secondsLeft = HHMMSSToSeconds(timer);

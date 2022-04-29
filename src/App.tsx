@@ -15,7 +15,7 @@ import { authentication } from "../firebase-config";
 import { onAuthStateChanged } from "firebase/auth";
 import CompleteProfilePage from "./Pages/CompleteProfile.Page";
 import DebugPage from "./Pages/Debug.Page";
-import { getMeDocRef, handleAuthChanges, handleMeChanges } from "./utils";
+import { getMeDocRef, handleAuthChanges, handleMeChanges, isExamOver } from "./utils";
 import { onSnapshot } from "firebase/firestore";
 import ProtectedRoutes from "./Components/ProtectedRoutes";
 import { defaultUserContext, userContext } from "./Contexts/user.contextt";
@@ -28,7 +28,8 @@ import AppContainer from "./Components/AppContainer";
 import HomePage from "./Pages/Home.Page";
 import { selectedExamContext } from "./Contexts/selectedExam.context";
 import { Exam } from "./Models/Exam";
-import { fetchSelectedExamAPI } from "./APIs/exam.api";
+import { fetchExamQuestionAPI, fetchSelectedExamAPI } from "./APIs/exam.api";
+import { isQuestionFetchableContext } from "./Contexts/isQuestionFetchable";
 
 interface AppProps {}
 
@@ -42,19 +43,27 @@ const App: FC<AppProps> = () => {
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const selectedExamValue = useMemo(() => ({ selectedExam, setSelectedExam }), [selectedExam]);
 
+  const [isQuestionFetchable, setIsQuestionFetchable] = useState(false);
+  const isQuestionFetchableValue = useMemo(() => ({ isQuestionFetchable, setIsQuestionFetchable }), [isQuestionFetchable]);
+
   const [isUserFetching, setIsUserFetching] = useState(true);
   const [isSelectedExamFetching, setIsSelectedExamFetching] = useState(true);
+
   const navigate = useNavigate();
 
   useEffect(() => {
     const unsubAuthObserver = onAuthStateChanged(authentication, (me) => {
       handleAuthChanges(me, setUser, setIsUserFetching);
-      fetchSelectedExamAPI().then((selectedExam) => {
-        if (selectedExam) {
-          setSelectedExam(selectedExam);
-        }
-      });
-      setIsSelectedExamFetching(false);
+      setIsSelectedExamFetching(true);
+      fetchSelectedExamAPI()
+        .then((selectedExam) => {
+          if (selectedExam) {
+            setSelectedExam(selectedExam);
+          }
+        })
+        .finally(() => {
+          setIsSelectedExamFetching(false);
+        });
     });
 
     return unsubAuthObserver;
@@ -66,11 +75,30 @@ const App: FC<AppProps> = () => {
     if (!meDocRef) return;
 
     const unsubMeObserver = onSnapshot(meDocRef, async (doc) => {
-      await handleMeChanges(doc, setUser, allowedRoutes, selectedExam, setAllowedRoutes, navigate);
+      await handleMeChanges(doc, setUser, allowedRoutes, selectedExam, setAllowedRoutes, navigate, isQuestionFetchable);
     });
 
     return unsubMeObserver;
   }, [user]);
+
+  //Check if Question is Fetchable
+  useEffect(() => {
+    if (!selectedExam) {
+      setIsQuestionFetchable(false);
+      return;
+    }
+    if (isExamOver(selectedExam)) {
+      setIsQuestionFetchable(false);
+      return;
+    }
+    fetchExamQuestionAPI()
+      .then(() => {
+        setIsQuestionFetchable(true);
+      })
+      .catch(() => {
+        setIsQuestionFetchable(false);
+      });
+  }, [selectedExam]);
 
   if (isUserFetching || isSelectedExamFetching) {
     return (
@@ -84,27 +112,29 @@ const App: FC<AppProps> = () => {
     <userContext.Provider value={userValue}>
       <allowedRoutesContext.Provider value={allowedRoutesValue}>
         <selectedExamContext.Provider value={selectedExamValue}>
-          <Routes>
-            <Route path={ROUTE_FORWARD_SLASH} element={<ProtectedRoutes />}>
-              <Route path={ROUTE_LOGIN} element={<SignInPage />} />
+          <isQuestionFetchableContext.Provider value={isQuestionFetchableValue}>
+            <Routes>
+              <Route path={ROUTE_FORWARD_SLASH} element={<ProtectedRoutes />}>
+                <Route path={ROUTE_LOGIN} element={<SignInPage />} />
 
-              <Route path={ROUTE_EXAM} element={<MainExamPage />} />
+                <Route path={ROUTE_EXAM} element={<MainExamPage />} />
 
-              <Route element={<AppContainer />}>
-                <Route path={ROUTE_HOMEPAGE} element={<HomePage />} />
+                <Route element={<AppContainer />}>
+                  <Route path={ROUTE_HOMEPAGE} element={<HomePage />} />
 
-                <Route path={ROUTE_PROFILE} element={<CompleteProfilePage />} />
+                  <Route path={ROUTE_PROFILE} element={<CompleteProfilePage />} />
 
-                <Route path={ROUTE_SLOTS} element={<ExamsPage />} />
+                  <Route path={ROUTE_SLOTS} element={<ExamsPage />} />
 
-                <Route path={ROUTE_EXAM_INSTRUCTIONS} element={<ExamInstructionsPage />} />
+                  <Route path={ROUTE_EXAM_INSTRUCTIONS} element={<ExamInstructionsPage />} />
+                </Route>
               </Route>
-            </Route>
 
-            <Route path={ROUTE_DEBUG} element={<DebugPage />} />
+              <Route path={ROUTE_DEBUG} element={<DebugPage />} />
 
-            <Route path="*" element={<Navigate to={ROUTE_FORWARD_SLASH} />} />
-          </Routes>
+              <Route path="*" element={<Navigate to={ROUTE_FORWARD_SLASH} />} />
+            </Routes>
+          </isQuestionFetchableContext.Provider>
         </selectedExamContext.Provider>
       </allowedRoutesContext.Provider>
     </userContext.Provider>
