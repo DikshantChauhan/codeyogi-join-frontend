@@ -15,8 +15,8 @@ import { authentication, db } from "../firebase-config";
 import { onAuthStateChanged } from "firebase/auth";
 import CompleteProfilePage from "./Pages/CompleteProfile.Page";
 import DebugPage from "./Pages/Debug.Page";
-import { handleAuthChanges, handleMeChanges } from "./utils";
-import { query, collection, where, limit, onSnapshot } from "firebase/firestore";
+import { getMeDocRef, handleAuthChanges, handleMeChanges } from "./utils";
+import { query, collection, where, limit, onSnapshot, getDoc } from "firebase/firestore";
 import ProtectedRoutes from "./Components/ProtectedRoutes";
 import { defaultUserContext, userContext } from "./Contexts/user.contextt";
 import { allowedRoutesContext, defaultAllowedRoutesContext } from "./Contexts/allowedRoutes.context";
@@ -56,9 +56,11 @@ const App: FC<AppProps> = () => {
 
   useEffect(() => {
     if (user) {
-      const meQuery = query(collection(db, "users"), where("phone_no", "==", user.phone_no), limit(1));
+      const meDocRef = getMeDocRef();
 
-      const unsubMeObserver = onSnapshot(meQuery, (doc) => {
+      if (!meDocRef) return;
+
+      const unsubMeObserver = onSnapshot(meDocRef, (doc) => {
         handleMeChanges(doc, setUser, allowedRoutes, selectedExam, setAllowedRoutes, navigate);
       });
 

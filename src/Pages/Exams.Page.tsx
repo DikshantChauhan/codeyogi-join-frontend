@@ -22,8 +22,8 @@ const Exams: FC<ExamsProps> = ({}) => {
   if (!isLoading && (!exams || exams.length === 0)) {
     return (
       <NoticeText>
-        <h1 className="text-center mt-20 text-2xl font-bold px-2">
-          Thanks for showing intrest in Codeyogi 😊. Right now there is no scheduled exam, visit after some time.
+        <h1 className="px-2 mt-20 text-2xl font-bold text-center">
+          Thanks for showing intrest in Codeyogi 😊. Right now there are no exam slots available, visit after some time.
         </h1>
       </NoticeText>
     );

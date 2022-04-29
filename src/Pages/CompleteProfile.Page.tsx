@@ -10,7 +10,6 @@ import { discoverySoucresFetchAPI } from "../APIs/discoverySources.api";
 import { meUpdateAPI } from "../APIs/auth.api";
 import { userContext } from "../Contexts/user.contextt";
 import Heading from "../Components/Heading";
-import { allowedRoutesContext } from "../Contexts/allowedRoutes.context";
 import { useNavigate } from "react-router";
 import { ROUTE_SLOTS } from "../constants.routes";
 
@@ -22,7 +21,6 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
   const [isLoading, setIsLoading] = useState(false);
   const { user, setUser } = useContext(userContext);
   const navigate = useNavigate();
-
   if (!user) return <></>;
 
   useEffect(() => {
@@ -70,6 +68,7 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
         console.error(error);
       }
 
+      navigate(ROUTE_SLOTS);
       setIsLoading((loading) => !loading);
     },
   });

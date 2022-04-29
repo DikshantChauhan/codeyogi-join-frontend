@@ -118,7 +118,7 @@ const SignInPage: FC<SignInPageProps> = () => {
           {isOTPSent && (
             <div className={`flex flex-col items-start`}>
               <label htmlFor="OTP" className={`min-w-max`}>
-                Phone number
+                OTP
               </label>
 
               <Input

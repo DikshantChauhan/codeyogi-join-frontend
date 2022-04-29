@@ -10,6 +10,7 @@ interface NavlistProps {}
 const Navlist: FC<NavlistProps> = ({}) => {
   const { allowedRoutes } = useContext(allowedRoutesContext);
   const { user } = useContext(userContext);
+  console.log(allowedRoutes);
 
   return (
     <ul className="flex flex-col mt-4 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium">

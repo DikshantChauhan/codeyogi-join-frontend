@@ -1,7 +1,7 @@
 import { User as FirebaseUser } from "@firebase/auth";
-import { addHours, isPast } from "date-fns";
+import { isPast } from "date-fns";
 import { addMinutes, subMinutes } from "date-fns/esm";
-import { Unsubscribe, DocumentData, QuerySnapshot, doc } from "firebase/firestore";
+import { Unsubscribe, DocumentData, QuerySnapshot, doc, DocumentSnapshot } from "firebase/firestore";
 import { NavigateFunction } from "react-router-dom";
 import { authentication, db } from "../firebase-config";
 import { meFetchAPI } from "./APIs/auth.api";
@@ -50,7 +50,6 @@ export const hasExamInstructionTimeStarted = (exam: Exam) => {
   const examStartedAt = new Date(exam.start_at.seconds * 1000);
   const examPreprationStartAt = subMinutes(examStartedAt, EXAM_INSTRUCTION_DURATION_IN_MINS);
 
-  console.log({ vsd: isPast(examPreprationStartAt) });
   if (isPast(examPreprationStartAt)) {
     return true;
   } else {
@@ -127,38 +126,61 @@ export const handleAllowedRoutes = (
   setAllowedRoutes: (routes: string[]) => void,
   navigate: NavigateFunction
 ) => {
-  const newAllowedRoutes = [];
+  const newAllowedRoutes: string[] = [];
   const currentRoute = window.location.pathname;
 
-  // "/login";
-  !user && newAllowedRoutes.push(ROUTE_LOGIN);
+  // // "/login";
+  // !user && newAllowedRoutes.push(ROUTE_LOGIN);
 
-  // "/profile";
-  user && newAllowedRoutes.push(ROUTE_PROFILE);
+  // // "/profile";
+  // user && newAllowedRoutes.push(ROUTE_PROFILE);
 
-  // "/slots";
-  user && isStudentProfileComplete(user) && (!user.selected_exam_id || user.status === "skipped") && newAllowedRoutes.push(ROUTE_SLOTS);
+  // // "/slots";
+  // user && isStudentProfileComplete(user) && (!user.selected_exam_id || user.status === "skipped") && newAllowedRoutes.push(ROUTE_SLOTS);
 
-  // "/home"
-  user &&
-    isStudentProfileComplete(user) &&
-    user.selected_exam_id &&
-    (user.status || (selectedExam && (!hasExamInstructionTimeStarted(selectedExam) || isExamOver(selectedExam) || isStudentFinishedExamEarly()))) &&
-    !user.exam_started_at &&
+  // // "/home"
+  // user &&
+  //   isStudentProfileComplete(user) &&
+  //   user.selected_exam_id &&
+  //   (user.status || (selectedExam && (!hasExamInstructionTimeStarted(selectedExam) || isExamOver(selectedExam) || isStudentFinishedExamEarly()))) &&
+  //   !user.exam_started_at &&
+  //   newAllowedRoutes.push(ROUTE_HOMEPAGE);
+
+  // // "/exam/instructions";
+  // user &&
+  //   isStudentProfileComplete(user) &&
+  //   user.selected_exam_id &&
+  //   selectedExam &&
+  //   hasExamInstructionTimeStarted(selectedExam) &&
+  //   !isExamOver(selectedExam) &&
+  //   !user.exam_started_at &&
+  //   newAllowedRoutes.push(ROUTE_EXAM_INSTRUCTIONS);
+
+  // // "/exam";
+  // user && user.exam_started_at && selectedExam && !isExamOver(selectedExam) && newAllowedRoutes.push(ROUTE_EXAM);
+
+  if (!user) {
+    newAllowedRoutes.push(ROUTE_LOGIN);
+  } else if (!isStudentProfileComplete(user)) {
+    newAllowedRoutes.push(ROUTE_PROFILE);
+  } else if (!user.selected_exam_id) {
+    newAllowedRoutes.push(ROUTE_SLOTS);
+  } else if (user.status === "skipped") {
     newAllowedRoutes.push(ROUTE_HOMEPAGE);
+    newAllowedRoutes.push(ROUTE_SLOTS);
+  } else if (selectedExam) {
+    if (!hasExamInstructionTimeStarted(selectedExam) || isExamOver(selectedExam)) {
+      newAllowedRoutes.push(ROUTE_HOMEPAGE);
+    } else if (!user.exam_started_at) {
+      newAllowedRoutes.push(ROUTE_EXAM_INSTRUCTIONS);
+    } else {
+      newAllowedRoutes.push(ROUTE_EXAM);
+    }
+  }
 
-  // "/exam/instructions";
-  user &&
-    isStudentProfileComplete(user) &&
-    user.selected_exam_id &&
-    selectedExam &&
-    hasExamInstructionTimeStarted(selectedExam) &&
-    !isExamOver(selectedExam) &&
-    !user.exam_started_at &&
-    newAllowedRoutes.push(ROUTE_EXAM_INSTRUCTIONS);
-
-  // "/exam";
-  user && user.exam_started_at && selectedExam && !isExamOver(selectedExam) && newAllowedRoutes.push(ROUTE_EXAM);
+  if (!newAllowedRoutes.find((route) => route === ROUTE_PROFILE)) {
+    newAllowedRoutes.push(ROUTE_PROFILE);
+  }
 
   const check = [...newAllowedRoutes].sort().toString() === [...currentAllowedRoutes].sort().toString();
 
@@ -167,32 +189,28 @@ export const handleAllowedRoutes = (
 
     if (currentRoute === ROUTE_FORWARD_SLASH) navigate(newAllowedRoutes[0]);
     if (currentRoute === ROUTE_LOGIN && user) navigate(newAllowedRoutes[0]);
-    if (!!!newAllowedRoutes.find((route) => route === currentRoute)) navigate(newAllowedRoutes[0]);
+    if (!newAllowedRoutes.find((route) => route === currentRoute)) navigate(newAllowedRoutes[0]);
   }
 };
 
 export const handleMeChanges = (
-  doc: QuerySnapshot<DocumentData>,
+  doc: DocumentSnapshot<DocumentData>,
   setUser: (user: User | null) => void,
   currentAllowedRoutes: string[],
   selectedExam: Exam | null,
   setAllowedRoutes: (routes: string[]) => void,
   navigate: NavigateFunction
 ) => {
-  setTimeout(() => {
-    let changedUser: User | null = null;
+  let changedUser: User | null = null;
 
-    doc.docChanges().forEach((change) => {
-      if (change.type === "modified") {
-        changedUser = change.doc.data() as User | null;
-        setUser(changedUser as User);
-      }
-    });
+  if (!doc.metadata.hasPendingWrites) {
+    changedUser = doc.data() as User | null;
+    setUser(changedUser as User);
+  }
 
-    if (changedUser) {
-      handleAllowedRoutes(changedUser, currentAllowedRoutes, selectedExam, setAllowedRoutes, navigate);
-    }
-  }, 1500);
+  if (changedUser) {
+    handleAllowedRoutes(changedUser, currentAllowedRoutes, selectedExam, setAllowedRoutes, navigate);
+  }
 };
 
 export const getMeDocRef = () => {
