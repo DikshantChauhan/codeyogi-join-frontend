@@ -5,6 +5,8 @@ import { selectedExamContext } from "../Contexts/selectedExam.context";
 import { HHMMSSToSeconds, isExamOver } from "../utils";
 import MDEditor from "@uiw/react-md-editor";
 import { useCountdown } from "../Hooks/Countdown";
+import Button from "../Components/Button";
+import { startExamAPI } from "../APIs/exam.api";
 
 interface ExamInstructionsPageProps {}
 
@@ -37,9 +39,14 @@ const ExamInstructionsPage: FC<ExamInstructionsPageProps> = () => {
         ) : (
           <div>
             <h1>Exam is going on</h1>
-            <Link className={`underline text-indigo-500 font-semibold`} to={ROUTE_EXAM}>
-              Enter
-            </Link>
+            <Button
+              className={`px-2 py-1`}
+              onClick={async () => {
+                await startExamAPI();
+              }}
+            >
+              Start
+            </Button>
           </div>
         )}
       </div>

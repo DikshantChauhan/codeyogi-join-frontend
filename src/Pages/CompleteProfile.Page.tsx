@@ -11,7 +11,7 @@ import { meUpdateAPI } from "../APIs/auth.api";
 import { userContext } from "../Contexts/user.contextt";
 import Heading from "../Components/Heading";
 import { useNavigate } from "react-router";
-import { ROUTE_SLOTS } from "../constants.routes";
+import { ROUTE_FORWARD_SLASH, ROUTE_SLOTS } from "../constants.routes";
 
 interface CompleteProfileProps {}
 
@@ -68,7 +68,7 @@ const CompleteProfile: FC<CompleteProfileProps> = ({}) => {
         console.error(error);
       }
 
-      navigate(ROUTE_SLOTS);
+      navigate(ROUTE_FORWARD_SLASH);
       setIsLoading((loading) => !loading);
     },
   });

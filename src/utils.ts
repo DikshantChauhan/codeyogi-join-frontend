@@ -1,11 +1,13 @@
 import { User as FirebaseUser } from "@firebase/auth";
 import { isPast } from "date-fns";
 import { addMinutes, subMinutes } from "date-fns/esm";
-import { Unsubscribe, DocumentData, QuerySnapshot, doc, DocumentSnapshot } from "firebase/firestore";
+import { RecaptchaVerifier } from "firebase/auth";
+import { Unsubscribe, DocumentData, doc, DocumentSnapshot } from "firebase/firestore";
 import { NavigateFunction } from "react-router-dom";
 import { authentication, db } from "../firebase-config";
 import { meFetchAPI } from "./APIs/auth.api";
 import { EXAM_DURATION_IN_MINS, EXAM_INSTRUCTION_DURATION_IN_MINS } from "./APIs/base";
+import { fetchSelectedExamAPI } from "./APIs/exam.api";
 import {
   ROUTE_PROFILE,
   ROUTE_SLOTS,
@@ -89,7 +91,7 @@ export const getExamInstructionTime = (exam: Exam) => {
   }
 };
 
-export const isStudentFinishedExamEarly = () => {
+export const hasStudentFinishedExamEarly = () => {
   return false;
 };
 
@@ -129,36 +131,6 @@ export const handleAllowedRoutes = (
   const newAllowedRoutes: string[] = [];
   const currentRoute = window.location.pathname;
 
-  // // "/login";
-  // !user && newAllowedRoutes.push(ROUTE_LOGIN);
-
-  // // "/profile";
-  // user && newAllowedRoutes.push(ROUTE_PROFILE);
-
-  // // "/slots";
-  // user && isStudentProfileComplete(user) && (!user.selected_exam_id || user.status === "skipped") && newAllowedRoutes.push(ROUTE_SLOTS);
-
-  // // "/home"
-  // user &&
-  //   isStudentProfileComplete(user) &&
-  //   user.selected_exam_id &&
-  //   (user.status || (selectedExam && (!hasExamInstructionTimeStarted(selectedExam) || isExamOver(selectedExam) || isStudentFinishedExamEarly()))) &&
-  //   !user.exam_started_at &&
-  //   newAllowedRoutes.push(ROUTE_HOMEPAGE);
-
-  // // "/exam/instructions";
-  // user &&
-  //   isStudentProfileComplete(user) &&
-  //   user.selected_exam_id &&
-  //   selectedExam &&
-  //   hasExamInstructionTimeStarted(selectedExam) &&
-  //   !isExamOver(selectedExam) &&
-  //   !user.exam_started_at &&
-  //   newAllowedRoutes.push(ROUTE_EXAM_INSTRUCTIONS);
-
-  // // "/exam";
-  // user && user.exam_started_at && selectedExam && !isExamOver(selectedExam) && newAllowedRoutes.push(ROUTE_EXAM);
-
   if (!user) {
     newAllowedRoutes.push(ROUTE_LOGIN);
   } else if (!isStudentProfileComplete(user)) {
@@ -169,7 +141,7 @@ export const handleAllowedRoutes = (
     newAllowedRoutes.push(ROUTE_HOMEPAGE);
     newAllowedRoutes.push(ROUTE_SLOTS);
   } else if (selectedExam) {
-    if (!hasExamInstructionTimeStarted(selectedExam) || isExamOver(selectedExam)) {
+    if (!hasExamInstructionTimeStarted(selectedExam)) {
       newAllowedRoutes.push(ROUTE_HOMEPAGE);
     } else if (!user.exam_started_at) {
       newAllowedRoutes.push(ROUTE_EXAM_INSTRUCTIONS);
@@ -178,7 +150,7 @@ export const handleAllowedRoutes = (
     }
   }
 
-  if (!newAllowedRoutes.find((route) => route === ROUTE_PROFILE)) {
+  if (!newAllowedRoutes.find((route) => route === ROUTE_PROFILE) && user) {
     newAllowedRoutes.push(ROUTE_PROFILE);
   }
 
@@ -193,7 +165,7 @@ export const handleAllowedRoutes = (
   }
 };
 
-export const handleMeChanges = (
+export const handleMeChanges = async (
   doc: DocumentSnapshot<DocumentData>,
   setUser: (user: User | null) => void,
   currentAllowedRoutes: string[],
@@ -208,6 +180,7 @@ export const handleMeChanges = (
     setUser(changedUser as User);
   }
 
+  if (changedUser?.selected_exam_id) await fetchSelectedExamAPI();
   if (changedUser) {
     handleAllowedRoutes(changedUser, currentAllowedRoutes, selectedExam, setAllowedRoutes, navigate);
   }
@@ -234,4 +207,17 @@ export const HHMMSSToSeconds = (time: string) => {
   const timeInSeconds = chunks[0] * 60 * 60 + chunks[1] * 60 + chunks[2];
 
   return timeInSeconds;
+};
+
+export const generateRecaptcha = (containerOrId: string | HTMLElement, success?: (response: any) => void) => {
+  return new RecaptchaVerifier(
+    containerOrId,
+    {
+      size: "invisible",
+      callback: (response: any) => {
+        success && success(response);
+      },
+    },
+    authentication
+  );
 };

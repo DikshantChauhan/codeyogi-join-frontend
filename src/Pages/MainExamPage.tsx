@@ -1,7 +1,7 @@
 import { addMinutes } from "date-fns";
 import { memo, FC, useState, useEffect, useCallback, useContext } from "react";
 import { Navigate } from "react-router";
-import { fetchExamQuestion, submitExamQuestion } from "../APIs/exam.api";
+import { fetchExamQuestionAPI, submitExamQuestionAPI } from "../APIs/exam.api";
 import QuestionCard from "../Components/AdmissionTest/QuestionCard";
 import { ROUTE_HOMEPAGE } from "../constants.routes";
 import { selectedExamContext } from "../Contexts/selectedExam.context";
@@ -43,7 +43,7 @@ const MainExamPage: FC<MainExamPageProps> = () => {
     setIssubmitting(true);
     setError("");
     try {
-      await submitExamQuestion(answer);
+      await submitExamQuestionAPI(answer);
     } catch (error) {
       setError("Unable to Submit your answer! please try again.");
       return;
@@ -54,7 +54,7 @@ const MainExamPage: FC<MainExamPageProps> = () => {
     setIsFetching(true);
 
     try {
-      const newQuestion = await fetchExamQuestion();
+      const newQuestion = await fetchExamQuestionAPI();
       if (!newQuestion) {
         setAdmissionQuestions([]);
       } else {
@@ -72,7 +72,7 @@ const MainExamPage: FC<MainExamPageProps> = () => {
   useEffect(() => {
     setIsFetching(true);
     setError("");
-    fetchExamQuestion()
+    fetchExamQuestionAPI()
       .then((response) => {
         if (!response) {
           setIsFetching(false);

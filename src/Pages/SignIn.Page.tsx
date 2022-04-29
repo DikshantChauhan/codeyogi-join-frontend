@@ -1,5 +1,5 @@
 import { FC, memo, useState } from "react";
-import { generateRecaptcha, signIn } from "../APIs/auth.api";
+import { signInAPI } from "../APIs/auth.api";
 import Input from "../Components/Form/Input";
 import { useFormik } from "formik";
 import * as yup from "yup";
@@ -8,6 +8,7 @@ import Logo from "../Components/Logo";
 import { ROUTE_FORWARD_SLASH } from "../constants.routes";
 import { useNavigate } from "react-router";
 import Heading from "../Components/Heading";
+import { generateRecaptcha } from "../utils";
 
 interface SignInPageProps {}
 
@@ -31,7 +32,7 @@ const SignInPage: FC<SignInPageProps> = () => {
     setIsOTPSending(true);
 
     try {
-      const confirmationResult = await signIn(`+91${phoneNumber}`, generateRecaptcha("recaptcha-container"));
+      const confirmationResult = await signInAPI(`+91${phoneNumber}`, generateRecaptcha("recaptcha-container"));
       window.confirmationResult = confirmationResult;
 
       setIsOTPSent(true);

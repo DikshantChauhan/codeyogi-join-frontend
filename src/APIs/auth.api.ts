@@ -1,17 +1,8 @@
-import { ApplicationVerifier, RecaptchaVerifier, signInWithPhoneNumber, signOut as firebaseSignout } from "firebase/auth";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { authentication, db } from "../../firebase-config";
+import { ApplicationVerifier, signInWithPhoneNumber, signOut as firebaseSignout } from "firebase/auth";
+import { getDoc, updateDoc } from "firebase/firestore";
+import { authentication } from "../../firebase-config";
 import { User } from "../Models/User";
 import { getMeDocRef } from "../utils";
-
-export interface MeUpdateRequest {
-  email: string;
-  first_name: string;
-  last_name: string;
-  institute_name: string;
-  city_of_residence: string;
-  discovery_source: string;
-}
 
 export const meFetchAPI = async () => {
   const meDocRef = getMeDocRef();
@@ -32,7 +23,7 @@ export const meFetchAPI = async () => {
   return meData;
 };
 
-export const meUpdateAPI = async (data: MeUpdateRequest) => {
+export const meUpdateAPI = async (data: Partial<User>) => {
   const meDocRef = getMeDocRef();
 
   if (!meDocRef) return;
@@ -44,23 +35,10 @@ export const meUpdateAPI = async (data: MeUpdateRequest) => {
   return meDoc.data() as User | undefined;
 };
 
-export const signIn = (phoneNumber: string, appVerifier: ApplicationVerifier) => {
+export const signInAPI = (phoneNumber: string, appVerifier: ApplicationVerifier) => {
   return signInWithPhoneNumber(authentication, phoneNumber, appVerifier);
 };
 
-export const signOut = () => {
+export const signOutAPI = () => {
   return firebaseSignout(authentication);
-};
-
-export const generateRecaptcha = (containerOrId: string | HTMLElement, success?: (response: any) => void) => {
-  return new RecaptchaVerifier(
-    containerOrId,
-    {
-      size: "invisible",
-      callback: (response: any) => {
-        success && success(response);
-      },
-    },
-    authentication
-  );
 };

@@ -1,5 +1,5 @@
 import { FC, memo, useContext, useEffect, useState } from "react";
-import { fetchSelectedExam } from "../APIs/exam.api";
+import { fetchSelectedExamAPI } from "../APIs/exam.api";
 import { userContext } from "../Contexts/user.contextt";
 import { Exam } from "../Models/Exam";
 import { secondsToHHMMSS } from "../utils";
@@ -35,7 +35,7 @@ const Countdown: FC<CountdownProps> = ({}) => {
 
   useEffect(() => {
     if (user) {
-      fetchSelectedExam().then((selectedExam) => {
+      fetchSelectedExamAPI().then((selectedExam) => {
         selectedExam && setSelectedExam(selectedExam);
       });
     }

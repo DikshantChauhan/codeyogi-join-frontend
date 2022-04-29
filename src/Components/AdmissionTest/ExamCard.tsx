@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { FC, memo, useState } from "react";
 import { FaSpinner } from "react-icons/fa";
-import { scheduleTest } from "../../APIs/cloudFunctions.api";
+import { scheduleTestAPI } from "../../APIs/cloudFunctions.api";
 import { Exam } from "../../Models/Exam";
 
 interface ExamCardProps {
@@ -16,7 +16,7 @@ const ExamCard: FC<ExamCardProps> = ({ exam, className }) => {
     setIsLoading(true);
 
     try {
-      await scheduleTest({ id: exam.external_id });
+      await scheduleTestAPI({ id: exam.external_id });
     } catch (error) {
       console.error(error);
     }

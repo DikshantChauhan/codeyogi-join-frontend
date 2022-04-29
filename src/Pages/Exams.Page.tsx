@@ -1,5 +1,5 @@
 import { memo, FC, useState, useEffect } from "react";
-import { fetchExamList } from "../APIs/exam.api";
+import { fetchExamListAPI } from "../APIs/exam.api";
 import ExamGrid from "../Components/AdmissionTest/ExamGrid";
 import NoticeText from "../Components/NoticeText";
 import { Exam } from "../Models/Exam";
@@ -11,7 +11,7 @@ const Exams: FC<ExamsProps> = ({}) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchExamList().then((exams) => {
+    fetchExamListAPI().then((exams) => {
       {
         exams && setExams(exams);
         setIsLoading(false);

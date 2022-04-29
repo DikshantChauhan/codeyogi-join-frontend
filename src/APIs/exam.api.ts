@@ -1,11 +1,12 @@
-import { collection, getDoc, getDocs, limit, orderBy, query, setDoc, where } from "firebase/firestore";
+import { collection, serverTimestamp, getDoc, getDocs, limit, orderBy, query, setDoc, where } from "firebase/firestore";
 import { authentication, db } from "../../firebase-config";
 import { Exam } from "../Models/Exam";
 import { StudentAnswerOptions, StudentQuestion } from "../Models/StudentQuestion";
 import { User } from "../Models/User";
 import { getMeDocRef, isStudentProfileComplete } from "../utils";
+import { meUpdateAPI } from "./auth.api";
 
-export const fetchSelectedExam = async () => {
+export const fetchSelectedExamAPI = async () => {
   const meDocRef = getMeDocRef();
 
   if (!meDocRef) return;
@@ -24,7 +25,7 @@ export const fetchSelectedExam = async () => {
   return selectedExam;
 };
 
-export const fetchExamList = async () => {
+export const fetchExamListAPI = async () => {
   const examDocsQuery = query(collection(db, "exams"), where("status", "==", "published"));
   const examDocs = await getDocs(examDocsQuery);
 
@@ -35,7 +36,7 @@ export const fetchExamList = async () => {
   return examList;
 };
 
-export const fetchExamQuestion = async () => {
+export const fetchExamQuestionAPI = async () => {
   if (!authentication.currentUser) return;
 
   const usersQuestionsCollectionref = collection(db, "users", authentication.currentUser.uid, "questions");
@@ -49,7 +50,7 @@ export const fetchExamQuestion = async () => {
   return question as StudentQuestion;
 };
 
-export const submitExamQuestion = async (answer: StudentAnswerOptions) => {
+export const submitExamQuestionAPI = async (answer: StudentAnswerOptions) => {
   if (!authentication.currentUser) return;
 
   const usersQuestionsCollectionref = collection(db, "users", authentication.currentUser.uid, "questions");
@@ -58,4 +59,8 @@ export const submitExamQuestion = async (answer: StudentAnswerOptions) => {
   const questionRef = questionSnapShort.docs[0].ref;
 
   await setDoc(questionRef, { answer }, { merge: true });
+};
+
+export const startExamAPI = async () => {
+  await meUpdateAPI({ exam_started_at: serverTimestamp() } as any);
 };

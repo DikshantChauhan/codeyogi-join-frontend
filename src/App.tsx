@@ -11,12 +11,12 @@ import {
   ROUTE_EXAM,
 } from "./constants.routes";
 import SignInPage from "./Pages/SignIn.Page";
-import { authentication, db } from "../firebase-config";
+import { authentication } from "../firebase-config";
 import { onAuthStateChanged } from "firebase/auth";
 import CompleteProfilePage from "./Pages/CompleteProfile.Page";
 import DebugPage from "./Pages/Debug.Page";
 import { getMeDocRef, handleAuthChanges, handleMeChanges } from "./utils";
-import { query, collection, where, limit, onSnapshot, getDoc } from "firebase/firestore";
+import { onSnapshot } from "firebase/firestore";
 import ProtectedRoutes from "./Components/ProtectedRoutes";
 import { defaultUserContext, userContext } from "./Contexts/user.contextt";
 import { allowedRoutesContext, defaultAllowedRoutesContext } from "./Contexts/allowedRoutes.context";
@@ -28,7 +28,7 @@ import AppContainer from "./Components/AppContainer";
 import HomePage from "./Pages/Home.Page";
 import { selectedExamContext } from "./Contexts/selectedExam.context";
 import { Exam } from "./Models/Exam";
-import { fetchSelectedExam } from "./APIs/exam.api";
+import { fetchSelectedExamAPI } from "./APIs/exam.api";
 
 interface AppProps {}
 
@@ -49,34 +49,27 @@ const App: FC<AppProps> = () => {
   useEffect(() => {
     const unsubAuthObserver = onAuthStateChanged(authentication, (me) => {
       handleAuthChanges(me, setUser, setIsUserFetching);
+      fetchSelectedExamAPI().then((selectedExam) => {
+        if (selectedExam) {
+          setSelectedExam(selectedExam);
+        }
+      });
+      setIsSelectedExamFetching(false);
     });
 
     return unsubAuthObserver;
   }, []);
 
   useEffect(() => {
-    if (user) {
-      const meDocRef = getMeDocRef();
+    const meDocRef = getMeDocRef();
 
-      if (!meDocRef) return;
+    if (!meDocRef) return;
 
-      const unsubMeObserver = onSnapshot(meDocRef, (doc) => {
-        handleMeChanges(doc, setUser, allowedRoutes, selectedExam, setAllowedRoutes, navigate);
-      });
+    const unsubMeObserver = onSnapshot(meDocRef, async (doc) => {
+      await handleMeChanges(doc, setUser, allowedRoutes, selectedExam, setAllowedRoutes, navigate);
+    });
 
-      return unsubMeObserver;
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (user?.selected_exam_id) {
-      fetchSelectedExam().then((selectedExam) => {
-        if (selectedExam) {
-          setSelectedExam(selectedExam);
-        }
-      });
-    }
-    setIsSelectedExamFetching(false);
+    return unsubMeObserver;
   }, [user]);
 
   if (isUserFetching || isSelectedExamFetching) {
@@ -95,6 +88,8 @@ const App: FC<AppProps> = () => {
             <Route path={ROUTE_FORWARD_SLASH} element={<ProtectedRoutes />}>
               <Route path={ROUTE_LOGIN} element={<SignInPage />} />
 
+              <Route path={ROUTE_EXAM} element={<MainExamPage />} />
+
               <Route element={<AppContainer />}>
                 <Route path={ROUTE_HOMEPAGE} element={<HomePage />} />
 
@@ -103,8 +98,6 @@ const App: FC<AppProps> = () => {
                 <Route path={ROUTE_SLOTS} element={<ExamsPage />} />
 
                 <Route path={ROUTE_EXAM_INSTRUCTIONS} element={<ExamInstructionsPage />} />
-
-                <Route path={ROUTE_EXAM} element={<MainExamPage />} />
               </Route>
             </Route>
 
