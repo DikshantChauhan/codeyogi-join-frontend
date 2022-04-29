@@ -1,6 +1,8 @@
+import { format } from "date-fns/esm";
 import { memo, FC, useContext } from "react";
 import { Link } from "react-router-dom";
-import {  ROUTE_SLOTS } from "../constants.routes";
+import NoticeText from "../Components/NoticeText";
+import { ROUTE_SLOTS } from "../constants.routes";
 import { isQuestionFetchableContext } from "../Contexts/isQuestionFetchable";
 import { selectedExamContext } from "../Contexts/selectedExam.context";
 import { userContext } from "../Contexts/user.contextt";
@@ -12,72 +14,90 @@ interface HomePageProps {}
 const HomePage: FC<HomePageProps> = ({}) => {
   const { selectedExam } = useContext(selectedExamContext);
   const { user } = useContext(userContext);
-  const resultTime = selectedExam && getResultTime(selectedExam)?.toLocaleTimeString();
-  const {isQuestionFetchable} = useContext(isQuestionFetchableContext)
+  const resultDate = getResultTime(selectedExam!);
+  const resultTime = format(resultDate, "hh:mm:ss b");
+  const { isQuestionFetchable } = useContext(isQuestionFetchableContext);
+  const countDownFrom = getExamInstructionTimeStartedAt(selectedExam!);
+
+  const timer = useCountdown(countDownFrom);
 
   //Skipped
   if (user?.status === "skipped") {
     return (
-      <div>
-        <h1>You missed the exam😔.</h1>
-        <Link to={ROUTE_SLOTS}>Go here to pick a slot.</Link>
-      </div>
+      <NoticeText>
+        <h1>You missed the exam 😔.</h1>
+
+        <h1>You can check for available exam slots by following the link below</h1>
+
+        <div className={`mt-5`}>
+          <Link className={`underline text-indigo-500 `} to={ROUTE_SLOTS}>
+            Schedule Exam
+          </Link>
+        </div>
+      </NoticeText>
     );
   }
 
   //Passed
   else if (user?.status === "passed") {
     return (
-      <div>
+      <NoticeText>
         <h1>🎊 Congratultions! 🎊</h1>
-        <h1>You passed.</h1>
-      </div>
+
+        <h1>You passed, we will contact you for the next steps.</h1>
+      </NoticeText>
     );
   }
 
   //Failed
   else if (user?.status === "failed") {
     return (
-      <div>
+      <NoticeText>
         <h1>Sorry 😔</h1>
+
         <h1>You failed.</h1>
-      </div>
+      </NoticeText>
     );
   }
 
   //CountDown
-  else if (selectedExam && !hasExamInstructionTimeStarted(selectedExam)) {
-    const countDownFrom = getExamInstructionTimeStartedAt(selectedExam);
-    const timer = useCountdown(countDownFrom);
+  else if (!hasExamInstructionTimeStarted(selectedExam!)) {
     return (
-      <div>
-        <h1>
-          <span>Exam will start in</span>
-          <span>{timer}</span>
-        </h1>
-      </div>
+      <NoticeText>
+        <h1>Exam will start in</h1>
+
+        <h1>{timer}</h1>
+      </NoticeText>
     );
   }
 
   //exam over, result not posted, exam_start_at = null
-  else if (selectedExam && isExamOver(selectedExam) && !user?.exam_started_at) {
-    return <h1>Tou didnt enter in exam, you will be able to re-pick slots once result for this exam is published</h1>;
+  else if (isExamOver(selectedExam!) && !user?.exam_started_at) {
+    return (
+      <NoticeText>
+        <h1>You didn't enter in exam, you will be able to re-pick slots once result for this exam is published</h1>
+      </NoticeText>
+    );
   }
 
   //Exam over
-  else if (selectedExam && isExamOver(selectedExam)) {
-    return <h1>Your results will be published by {resultTime}</h1>;
+  else if (isExamOver(selectedExam!)) {
+    return (
+      <NoticeText>
+        <h1>Your results will be published by {resultTime}</h1>
+      </NoticeText>
+    );
   }
 
   //Student finished early
   else if (!isQuestionFetchable) {
     return (
-      <div>
+      <NoticeText>
         <h1>Exam is going on..Your results will be published by {resultTime}</h1>
-      </div>
+      </NoticeText>
     );
   }
-  
+
   return <></>;
 };
 
