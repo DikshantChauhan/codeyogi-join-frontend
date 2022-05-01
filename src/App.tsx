@@ -95,7 +95,7 @@ const App: FC<AppProps> = () => {
       setIsQuestionFetchable(false);
       return;
     }
-    fetchExamQuestionAPI()
+    fetchExamQuestionAPI(selectedExam)
       .then(() => {
         setIsQuestionFetchable(true);
       })

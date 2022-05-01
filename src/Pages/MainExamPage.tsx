@@ -1,5 +1,4 @@
-import { addMinutes } from "date-fns";
-import { memo, FC, useState, useEffect, useCallback, useContext } from "react";
+import { memo, FC, useState, useEffect, useCallback, useContext, useMemo } from "react";
 import { Navigate } from "react-router";
 import { fetchExamQuestionAPI, submitExamQuestionAPI } from "../APIs/exam.api";
 import QuestionCard from "../Components/AdmissionTest/QuestionCard";
@@ -7,6 +6,7 @@ import { ROUTE_HOMEPAGE } from "../constants.routes";
 import { selectedExamContext } from "../Contexts/selectedExam.context";
 import { useCountdown } from "../Hooks/Countdown";
 import { StudentAnswerOptions, StudentQuestion } from "../Models/StudentQuestion";
+import { getExamEndAt, isQuestionSubmitable } from "../utils";
 
 interface MainExamPageProps {}
 
@@ -18,9 +18,18 @@ const MainExamPage: FC<MainExamPageProps> = () => {
   const [error, setError] = useState("");
   const [admissionQuestions, setAdmissionQuestions] = useState<StudentQuestion[]>([]);
   const { selectedExam } = useContext(selectedExamContext);
-  const selectedExamOverTime = addMinutes(new Date(selectedExam!.start_at.seconds * 1000), 60);
+  const examEndAt = getExamEndAt(selectedExam!);
 
-  const timer = useCountdown(selectedExamOverTime);
+  const [isCoolDownVisible, setIsCoolDownVisible] = useState(false);
+  const countDownValue = useMemo(() => {
+    return admissionQuestions[0]?.submitableAfter || new Date();
+  }, [isCoolDownVisible]);
+  const handleCoolDownFinished = useCallback(() => {
+    setIsCoolDownVisible(false);
+  }, []);
+  const coolDownTimer = useCountdown(countDownValue, { enableReinitialization: true, onCountDownFinish: handleCoolDownFinished });
+
+  const ExamEndAtCountDown = useCountdown(examEndAt);
 
   const handleRef = useCallback((node) => {
     if (node !== null) {
@@ -40,21 +49,30 @@ const MainExamPage: FC<MainExamPageProps> = () => {
   };
 
   const handleSubmit = async (answer: StudentAnswerOptions) => {
+    //check if question is submitable
+    const question = admissionQuestions[0];
+    if (!isQuestionSubmitable(question)) {
+      setIsCoolDownVisible(true);
+      return;
+    }
+    setIsCoolDownVisible(false);
+    console.log(question.submitableAfter.toLocaleTimeString());
+
+    //submit answer
     setIssubmitting(true);
     setError("");
     try {
-      await submitExamQuestionAPI(answer);
+      await submitExamQuestionAPI(answer, question.id);
     } catch (error) {
       setError("Unable to Submit your answer! please try again.");
       return;
     }
-
     setIssubmitting(false);
 
+    //fetch new question
     setIsFetching(true);
-
     try {
-      const newQuestion = await fetchExamQuestionAPI();
+      const newQuestion = await fetchExamQuestionAPI(selectedExam!);
       if (!newQuestion) {
         setAdmissionQuestions([]);
       } else {
@@ -65,54 +83,56 @@ const MainExamPage: FC<MainExamPageProps> = () => {
       setError("Unable to fetch question! please try again.");
       return;
     }
-
     setIsFetching(false);
   };
 
   useEffect(() => {
     setIsFetching(true);
     setError("");
-    fetchExamQuestionAPI()
+    fetchExamQuestionAPI(selectedExam!)
       .then((response) => {
         if (!response) {
-          setIsFetching(false);
           setAdmissionQuestions([]);
         } else {
+          console.log(response);
           setAdmissionQuestions([...admissionQuestions, response]);
         }
       })
       .catch(() => {
         setError("Unable to fetch question! please try again.");
+      })
+      .finally(() => {
+        setIsFetching(false);
       });
   }, []);
 
   return !isFetching && admissionQuestions.length === 0 ? (
     <Navigate to={ROUTE_HOMEPAGE} />
   ) : (
-    <div>
-      <div className="flex items-center justify-center min-h-screen">
-        <div className={`absolute top-5 right-5 p-2 border border-indigo-500 text-indigo-500 rounded-md`}>{timer}</div>
-
-        <div className={`flex flex-col`}>
-          <div style={{ height: `${selectedIteamHeight}px` }}>
-            {admissionQuestions.map((question, index) => {
-              const ref = index === 0 ? handleRef : null;
-              const marginTop = index === 0 && isAnimating && `-${selectedIteamHeight}px`;
-
-              return (
-                <div
-                  ref={ref}
-                  key={index}
-                  style={{ marginTop: marginTop || "0px" }}
-                  className={`${isAnimating ? "transition-all duration-500" : ""}`}
-                >
-                  <QuestionCard isSubmitting={isSubmiting} trySubmit={handleSubmit} admissionQuestion={question} />
-                </div>
-              );
-            })}
-          </div>
-          {error && <p className={`text-red-600`}> error {error}</p>}
+    <div className="flex items-center justify-center min-h-screen">
+      <div className={`flex flex-col pt-12 relative`}>
+        <div className="flex justify-between absolute top-1 left-1 right-1">
+          {isCoolDownVisible && <div className={`p-2 border border-red-500 text-red-500 rounded-md max-w-max flex-1`}>{coolDownTimer}</div>}
+          <div className={`p-2 border border-indigo-500 text-indigo-500 rounded-md max-w-max ml-auto`}>{ExamEndAtCountDown}</div>
         </div>
+        <div style={{ height: `${selectedIteamHeight}px` }}>
+          {admissionQuestions.map((question, index) => {
+            const ref = index === 0 ? handleRef : null;
+            const marginTop = index === 0 && isAnimating && `-${selectedIteamHeight}px`;
+
+            return (
+              <div
+                ref={ref}
+                key={index + question.id}
+                style={{ marginTop: marginTop || "0px" }}
+                className={`${isAnimating ? "transition-all duration-500" : ""}`}
+              >
+                <QuestionCard isSubmitting={isSubmiting} trySubmit={handleSubmit} admissionQuestion={question} isAnimating={isAnimating} />
+              </div>
+            );
+          })}
+        </div>
+        {error || (isCoolDownVisible && <p className={`text-red-600 text-center`}> error: {isCoolDownVisible ? "You reached Submission limit!" : error}</p>)}
       </div>
     </div>
   );

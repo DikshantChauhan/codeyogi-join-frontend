@@ -18,6 +18,7 @@ import {
   ROUTE_EXAM,
 } from "./constants.routes";
 import { Exam } from "./Models/Exam";
+import { StudentQuestion } from "./Models/StudentQuestion";
 import { User } from "./Models/User";
 
 const studentProfileFields = ["city_of_residence", "discovery_source", "email", "first_name", "last_name", "institute_name", "phone_no"];
@@ -91,7 +92,7 @@ export const getExamInstructionTimeStartedAt = (exam: Exam) => {
 };
 
 export const hasStudentFinishedExamEarly = (isQuestionFetchable: boolean, exam: Exam) => {
-  if (!isExamOver(exam) && isQuestionFetchable) {
+  if (!isExamOver(exam) && hasExamStarted(exam) && !isQuestionFetchable) {
     return true;
   }
   return false;
@@ -166,6 +167,14 @@ export const handleAllowedRoutes = (
 
   // // "/profile";
   // user && newAllowedRoutes.push(ROUTE_PROFILE);
+  // if (user && selectedExam) {
+  //   console.log({
+  //     hasExamInstructionTimeStarted: hasExamInstructionTimeStarted(selectedExam),
+  //     hasStudentFinishedExamEarly: hasStudentFinishedExamEarly(isQuestionFetchable, selectedExam),
+  //     isExamOver: isExamOver(selectedExam),
+  //     isQuestionFetchable
+  //   });
+  // }
 
   if (!user) {
     newAllowedRoutes.push(ROUTE_LOGIN);
@@ -179,7 +188,6 @@ export const handleAllowedRoutes = (
   } else if (user.status) {
     newAllowedRoutes.push(ROUTE_HOMEPAGE);
   } else if (selectedExam) {
-
     if (!hasExamInstructionTimeStarted(selectedExam)) {
       newAllowedRoutes.push(ROUTE_HOMEPAGE);
     } else if (hasStudentFinishedExamEarly(isQuestionFetchable, selectedExam) || isExamOver(selectedExam)) {
@@ -268,4 +276,26 @@ export const generateRecaptcha = (containerOrId: string | HTMLElement, success?:
     },
     authentication
   );
+};
+
+export const getQuestionSubmitableAfterTime = (questionNumber: number, exam: Exam) => {
+  if (questionNumber <= 3) {
+    return getExamStartAt(exam);
+  }
+  const submitableTime = (questionNumber - 3) * 2 * 60 * 1000 + getExamStartAt(exam).getTime();
+  return new Date(submitableTime);
+};
+
+export const isQuestionSubmitable = (question: StudentQuestion) => {
+  const questionSubmitableAfter = question.submitableAfter;
+  if (isPast(questionSubmitableAfter)) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+export const getExamEndAt = (exam: Exam) => {
+  const examEndAt = addMinutes(getExamStartAt(exam), EXAM_DURATION_IN_MINS);
+  return examEndAt;
 };

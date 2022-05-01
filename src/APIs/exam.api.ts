@@ -3,7 +3,7 @@ import { authentication, db } from "../../firebase-config";
 import { Exam } from "../Models/Exam";
 import { StudentAnswerOptions, StudentQuestion } from "../Models/StudentQuestion";
 import { User } from "../Models/User";
-import { getMeDocRef, isStudentProfileComplete } from "../utils";
+import { getMeDocRef, getQuestionSubmitableAfterTime, isStudentProfileComplete } from "../utils";
 import { meUpdateAPI } from "./auth.api";
 
 export const fetchSelectedExamAPI = async () => {
@@ -36,7 +36,7 @@ export const fetchExamListAPI = async () => {
   return examList;
 };
 
-export const fetchExamQuestionAPI = async () => {
+export const fetchExamQuestionAPI = async (exam: Exam) => {
   if (!authentication.currentUser) return;
 
   const usersQuestionsCollectionref = collection(db, "users", authentication.currentUser.uid, "questions");
@@ -45,16 +45,17 @@ export const fetchExamQuestionAPI = async () => {
 
   if (questionSnapShort.empty) return;
 
-  const question = questionSnapShort.docs[0].data() as any;
+  const question = questionSnapShort.docs[0].data() as StudentQuestion;
+  const submitableAfter = getQuestionSubmitableAfterTime(question.id, exam);
 
-  return question as StudentQuestion;
+  return { ...question, submitableAfter };
 };
 
-export const submitExamQuestionAPI = async (answer: StudentAnswerOptions) => {
+export const submitExamQuestionAPI = async (answer: StudentAnswerOptions, id: number) => {
   if (!authentication.currentUser) return;
 
   const usersQuestionsCollectionref = collection(db, "users", authentication.currentUser.uid, "questions");
-  const questionQuery = query(usersQuestionsCollectionref, where("answer", "==", null), limit(1));
+  const questionQuery = query(usersQuestionsCollectionref, where("id", "==", id), limit(1));
   const questionSnapShort = await getDocs(questionQuery);
   const questionRef = questionSnapShort.docs[0].ref;
 

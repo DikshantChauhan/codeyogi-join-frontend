@@ -9,4 +9,6 @@ export interface StudentQuestion {
   };
   questionText: string;
   answer: StudentAnswerOptions;
+  id: number;
+  submitableAfter: Date;
 }

@@ -9,10 +9,11 @@ import { StudentAnswerOptions, StudentQuestion } from "../../Models/StudentQuest
 interface QuestioinCardProps {
   admissionQuestion: StudentQuestion;
   isSubmitting: boolean;
+  isAnimating?: boolean;
   trySubmit: (answer: StudentAnswerOptions) => Promise<void>;
 }
 
-const QuestionCard: FC<QuestioinCardProps> = ({ admissionQuestion, isSubmitting, trySubmit }) => {
+const QuestionCard: FC<QuestioinCardProps> = ({ admissionQuestion, isSubmitting, trySubmit, isAnimating }) => {
   const formik = useFormik<{ userAnswer: StudentAnswerOptions }>({
     initialValues: { userAnswer: null },
 
@@ -27,9 +28,11 @@ const QuestionCard: FC<QuestioinCardProps> = ({ admissionQuestion, isSubmitting,
 
   return (
     <div className="max-w-lg p-2 py-6 mx-auto min-w-xxs">
-      <h2>{admissionQuestion.questionText}</h2>
-
       <form onSubmit={formik.handleSubmit}>
+        <div className="mb-2">
+          <h2 className="font-bold">#{admissionQuestion.id}.</h2>
+          <p>{admissionQuestion.questionText}</p>
+        </div>
         <RadioGroup value={formik.values.userAnswer} onChange={async (value) => await formik.setValues({ userAnswer: value })}>
           <RadioGroup.Label className="sr-only">Server size</RadioGroup.Label>
           <div className="pb-2 space-y-2">
@@ -67,7 +70,7 @@ const QuestionCard: FC<QuestioinCardProps> = ({ admissionQuestion, isSubmitting,
             })}
           </div>
         </RadioGroup>
-        {isSubmitting ? (
+        {isSubmitting || isAnimating ? (
           <p className="text-center">Loading new Question...</p>
         ) : (
           <div className="flex justify-between">
