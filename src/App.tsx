@@ -21,7 +21,7 @@ import ProtectedRoutes from "./Components/ProtectedRoutes";
 import { defaultUserContext, userContext } from "./Contexts/user.contextt";
 import { allowedRoutesContext, defaultAllowedRoutesContext } from "./Contexts/allowedRoutes.context";
 import { User } from "./Models/User";
-import ExamsPage from "./Pages/Exams.Page";
+import SlotsPage from "./Pages/Slots.Page";
 import ExamInstructionsPage from "./Pages/ExamInstructions.Page";
 import MainExamPage from "./Pages/MainExamPage";
 import AppContainer from "./Components/AppContainer";
@@ -128,7 +128,7 @@ const App: FC<AppProps> = () => {
 
                   <Route path={ROUTE_PROFILE} element={<CompleteProfilePage />} />
 
-                  <Route path={ROUTE_SLOTS} element={<ExamsPage />} />
+                  <Route path={ROUTE_SLOTS} element={<SlotsPage />} />
 
                   <Route path={ROUTE_EXAM_INSTRUCTIONS} element={<ExamInstructionsPage />} />
                 </Route>
