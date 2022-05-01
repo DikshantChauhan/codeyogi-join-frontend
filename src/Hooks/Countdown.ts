@@ -8,14 +8,15 @@ export const useCountdown = (countdownFrom: Date, options?: { enableReinitializa
 
   useEffect(() => {
     const loopover = setInterval(() => {
-      const timeLeft = Math.floor((countdownFrom.getTime() - Date.now()) / 1000);
+      const timeLeft = countdownFrom.getTime() - Date.now()
+      const timeLeftApprox = Math.floor((timeLeft) / 1000);
       if (timeLeft <= 0) {
         handleCountDownFinished && handleCountDownFinished();
         setTimer("00:00:00");
         clearInterval(loopover);
         return;
       }
-      setTimer(secondsToHHMMSS(timeLeft));
+      setTimer(secondsToHHMMSS(timeLeftApprox));
     }, 1000);
 
     return () => {

@@ -9,7 +9,7 @@ import { handleAllowedRoutes } from "../utils";
 
 interface ProtectedRoutesProps {}
 
-const ProtectedRoutes: FC<ProtectedRoutesProps> = ({}) => {
+const ProtectedRoutes: FC<ProtectedRoutesProps> = () => {
   const { allowedRoutes, setAllowedRoutes } = useContext(allowedRoutesContext);
   const { user } = useContext(userContext);
   const { selectedExam } = useContext(selectedExamContext);

@@ -1,8 +1,9 @@
 import { memo, FC, useState, useEffect, useCallback, useContext, useMemo } from "react";
-import { Navigate } from "react-router";
+import { Navigate, useNavigate } from "react-router";
 import { fetchExamQuestionAPI, submitExamQuestionAPI } from "../APIs/exam.api";
 import QuestionCard from "../Components/AdmissionTest/QuestionCard";
-import { ROUTE_HOMEPAGE } from "../constants.routes";
+import { ROUTE_EXAM, ROUTE_HOMEPAGE } from "../constants.routes";
+import { allowedRoutesContext } from "../Contexts/allowedRoutes.context";
 import { selectedExamContext } from "../Contexts/selectedExam.context";
 import { useCountdown } from "../Hooks/Countdown";
 import { StudentAnswerOptions, StudentQuestion } from "../Models/StudentQuestion";
@@ -19,6 +20,8 @@ const MainExamPage: FC<MainExamPageProps> = () => {
   const [admissionQuestions, setAdmissionQuestions] = useState<StudentQuestion[]>([]);
   const { selectedExam } = useContext(selectedExamContext);
   const examEndAt = getExamEndAt(selectedExam!);
+  const { allowedRoutes, setAllowedRoutes } = useContext(allowedRoutesContext);
+  const navigate = useNavigate();
 
   const [isCoolDownVisible, setIsCoolDownVisible] = useState(false);
   const countDownValue = useMemo(() => {
@@ -29,7 +32,13 @@ const MainExamPage: FC<MainExamPageProps> = () => {
   }, []);
   const coolDownTimer = useCountdown(countDownValue, { enableReinitialization: true, onCountDownFinish: handleCoolDownFinished });
 
-  const ExamEndAtCountDown = useCountdown(examEndAt);
+  const handleExamFinished = useCallback(() => {
+    const currentAllowedRoutes = [...allowedRoutes].filter((route) => route !== ROUTE_EXAM);
+    currentAllowedRoutes.unshift(ROUTE_HOMEPAGE);
+    setAllowedRoutes(currentAllowedRoutes);
+    navigate(ROUTE_HOMEPAGE);
+  }, []);
+  const ExamEndAtCountDown = useCountdown(examEndAt, { onCountDownFinish: handleExamFinished });
 
   const handleRef = useCallback((node) => {
     if (node !== null) {
@@ -56,7 +65,6 @@ const MainExamPage: FC<MainExamPageProps> = () => {
       return;
     }
     setIsCoolDownVisible(false);
-    console.log(question.submitableAfter.toLocaleTimeString());
 
     //submit answer
     setIssubmitting(true);
@@ -94,7 +102,6 @@ const MainExamPage: FC<MainExamPageProps> = () => {
         if (!response) {
           setAdmissionQuestions([]);
         } else {
-          console.log(response);
           setAdmissionQuestions([...admissionQuestions, response]);
         }
       })
@@ -132,7 +139,8 @@ const MainExamPage: FC<MainExamPageProps> = () => {
             );
           })}
         </div>
-        {error || (isCoolDownVisible && <p className={`text-red-600 text-center`}> error: {isCoolDownVisible ? "You reached Submission limit!" : error}</p>)}
+        {error ||
+          (isCoolDownVisible && <p className={`text-red-600 text-center`}> error: {isCoolDownVisible ? "You reached Submission limit!" : error}</p>)}
       </div>
     </div>
   );

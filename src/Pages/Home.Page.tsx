@@ -1,8 +1,9 @@
 import { format } from "date-fns/esm";
-import { memo, FC, useContext } from "react";
-import { Link } from "react-router-dom";
+import { memo, FC, useContext, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import NoticeText from "../Components/NoticeText";
-import { ROUTE_SLOTS } from "../constants.routes";
+import { ROUTE_EXAM_INSTRUCTIONS, ROUTE_HOMEPAGE, ROUTE_SLOTS } from "../constants.routes";
+import { allowedRoutesContext } from "../Contexts/allowedRoutes.context";
 import { isQuestionFetchableContext } from "../Contexts/isQuestionFetchable";
 import { selectedExamContext } from "../Contexts/selectedExam.context";
 import { userContext } from "../Contexts/user.contextt";
@@ -18,8 +19,14 @@ const HomePage: FC<HomePageProps> = ({}) => {
   const resultTime = format(resultDate, "hh:mm:ss b");
   const { isQuestionFetchable } = useContext(isQuestionFetchableContext);
   const countDownFrom = getExamInstructionTimeStartedAt(selectedExam!);
-
-  const timer = useCountdown(countDownFrom);
+  const navigate = useNavigate();
+  const { allowedRoutes, setAllowedRoutes } = useContext(allowedRoutesContext);
+  const handleCountDownFinished = useCallback(() => {
+    const currentAllowedRoutes = [...allowedRoutes].filter((route) => route !== ROUTE_HOMEPAGE);
+    currentAllowedRoutes.unshift(ROUTE_EXAM_INSTRUCTIONS);
+    setAllowedRoutes(currentAllowedRoutes);
+    navigate(ROUTE_EXAM_INSTRUCTIONS);
+  }, []);
 
   //Skipped
   if (user?.status === "skipped") {
@@ -43,7 +50,7 @@ const HomePage: FC<HomePageProps> = ({}) => {
     return (
       <NoticeText>
         <h1>🎊 Congratultions! 🎊</h1>
-
+        <h1>You Passed</h1>
         <h1>You passed, we will contact you for the next steps.</h1>
       </NoticeText>
     );
@@ -54,7 +61,6 @@ const HomePage: FC<HomePageProps> = ({}) => {
     return (
       <NoticeText>
         <h1>Sorry 😔</h1>
-
         <h1>You failed.</h1>
       </NoticeText>
     );
@@ -62,6 +68,7 @@ const HomePage: FC<HomePageProps> = ({}) => {
 
   //CountDown
   else if (!hasExamInstructionTimeStarted(selectedExam!)) {
+    const timer = useCountdown(countDownFrom, { onCountDownFinish: handleCountDownFinished });
     return (
       <NoticeText>
         <h1>Exam will start in</h1>

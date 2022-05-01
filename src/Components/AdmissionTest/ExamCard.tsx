@@ -32,10 +32,10 @@ const ExamCard: FC<ExamCardProps> = ({ exam, className }) => {
       </h3>
 
       <button
-        className={`p-3 bg-blue-600 hover:bg-blue-700 text-sm font-medium text-white border border-transparent rounded-br-lg`}
+        className={`p-3 bg-blue-600 hover:bg-blue-700 text-sm font-medium text-white border border-transparent rounded-br-lg flex justify-center items-center`}
         onClick={handleScheduleClick}
       >
-        <span className="ml-1 sm:ml-3">{isLoading ? <FaSpinner className={`animate-spin text-black w-5 h-5 mx-auto`} /> : "Schedule"}</span>
+        <span className="ml-1 sm:ml-3">{isLoading ? <FaSpinner className={`animate-spin text-black w-5 h-5`} /> : "Schedule"}</span>
       </button>
     </li>
   );

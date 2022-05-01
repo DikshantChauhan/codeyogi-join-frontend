@@ -8,6 +8,7 @@ import { authentication, db } from "../firebase-config";
 import { meFetchAPI } from "./APIs/auth.api";
 import { EXAM_DURATION_IN_MINS, EXAM_INSTRUCTION_DURATION_IN_MINS } from "./APIs/base";
 import { fetchSelectedExamAPI } from "./APIs/exam.api";
+import { setUserEnteredRoute, userEnteredRoute } from "./App";
 import {
   ROUTE_PROFILE,
   ROUTE_SLOTS,
@@ -135,47 +136,6 @@ export const handleAllowedRoutes = (
   const newAllowedRoutes: string[] = [];
   const currentRoute = window.location.pathname;
 
-  // // "/login";
-  // !user && newAllowedRoutes.push(ROUTE_LOGIN);
-
-  // // "/exam";
-  // user && user.exam_started_at && selectedExam && !isExamOver(selectedExam) && newAllowedRoutes.push(ROUTE_EXAM);
-
-  // // "/exam/instructions";
-  // user &&
-  //   isStudentProfileComplete(user) &&
-  //   user.selected_exam_id &&
-  //   selectedExam &&
-  //   isExamInstructionTimeStarted(selectedExam) &&
-  //   !isExamOver(selectedExam) &&
-  //   !user.exam_started_at &&
-  //   newAllowedRoutes.push(ROUTE_EXAM_INSTRUCTIONS);
-
-  // // "/home"
-  // user &&
-  //   isStudentProfileComplete(user) &&
-  //   user.selected_exam_id &&
-  //   (user.status ||
-  //     (selectedExam &&
-  //       (!isExamInstructionTimeStarted(selectedExam) ||
-  //         isExamOver(selectedExam) ||
-  //         isStudentFinishedExamEarly(isQuestionFetchable, selectedExam)))) &&
-  //   newAllowedRoutes.push(ROUTE_HOMEPAGE);
-
-  // // "/slots";
-  // user && isStudentProfileComplete(user) && (!user.selected_exam_id || user.status === "skipped") && newAllowedRoutes.push(ROUTE_SLOTS);
-
-  // // "/profile";
-  // user && newAllowedRoutes.push(ROUTE_PROFILE);
-  // if (user && selectedExam) {
-  //   console.log({
-  //     hasExamInstructionTimeStarted: hasExamInstructionTimeStarted(selectedExam),
-  //     hasStudentFinishedExamEarly: hasStudentFinishedExamEarly(isQuestionFetchable, selectedExam),
-  //     isExamOver: isExamOver(selectedExam),
-  //     isQuestionFetchable
-  //   });
-  // }
-
   if (!user) {
     newAllowedRoutes.push(ROUTE_LOGIN);
   } else if (!isStudentProfileComplete(user)) {
@@ -199,18 +159,13 @@ export const handleAllowedRoutes = (
     }
   }
 
-  if (!newAllowedRoutes.find((route) => route === ROUTE_PROFILE) && user) {
-    newAllowedRoutes.push(ROUTE_PROFILE);
-  }
-
   const check = [...newAllowedRoutes].sort().toString() === [...currentAllowedRoutes].sort().toString();
 
   if (!check) {
     setAllowedRoutes(newAllowedRoutes);
+    //console.log(newAllowedRoutes[0], " ", isExamOver(selectedExam!), " ", hasStudentFinishedExamEarly(isQuestionFetchable, selectedExam!));
 
-    if (currentRoute === ROUTE_FORWARD_SLASH) navigate(newAllowedRoutes[0]);
-    if (currentRoute === ROUTE_LOGIN && user) navigate(newAllowedRoutes[0]);
-    if (!newAllowedRoutes.find((route) => route === currentRoute)) navigate(newAllowedRoutes[0]);
+    navigate(newAllowedRoutes[0]);
   }
 };
 
@@ -223,7 +178,8 @@ export const handleMeChanges = async (
   navigate: NavigateFunction,
   setSelectedExam: (user: Exam | null) => void,
   setIsSelectedExamFetching: (isLoadin: boolean) => void,
-  isQuestionFetchable: boolean
+  isQuestionFetchable: boolean,
+  user: User | null
 ) => {
   let changedUser: User | null = null;
   let exam: Exam | null = null;
@@ -232,13 +188,12 @@ export const handleMeChanges = async (
     changedUser = doc.data() as User | null;
     exam = (await fetchSelectedExamAPI()) || null;
 
-    setSelectedExam(exam);
-    setIsSelectedExamFetching(false);
-    setUser(changedUser as User);
-  }
-
-  if (changedUser) {
-    handleAllowedRoutes(changedUser, currentAllowedRoutes, selectedExam, setAllowedRoutes, navigate, isQuestionFetchable);
+    if (JSON.stringify(user) !== JSON.stringify(changedUser)) {
+      setSelectedExam(exam);
+      setIsSelectedExamFetching(false);
+      setUser(changedUser as User);
+      handleAllowedRoutes(changedUser, currentAllowedRoutes, selectedExam, setAllowedRoutes, navigate, isQuestionFetchable);
+    }
   }
 };
 

@@ -31,10 +31,18 @@ import { Exam } from "./Models/Exam";
 import { fetchExamQuestionAPI, fetchSelectedExamAPI } from "./APIs/exam.api";
 import { isQuestionFetchableContext } from "./Contexts/isQuestionFetchable";
 
+export let userEnteredRoute = ROUTE_FORWARD_SLASH;
+export const setUserEnteredRoute = (route: string) => {
+  userEnteredRoute = route;
+};
+window.onload = () => {
+  setUserEnteredRoute(location.pathname);
+};
+
 interface AppProps {}
 
 const App: FC<AppProps> = () => {
-  const [user, setUser] = useState<User | null>(defaultUserContext.user);
+  const [user, setUser] = useState<User | null>(null);
   const userValue = useMemo(() => ({ user, setUser }), [user]);
 
   const [allowedRoutes, setAllowedRoutes] = useState<string[]>(defaultAllowedRoutesContext.allowedRoutes);
@@ -78,7 +86,8 @@ const App: FC<AppProps> = () => {
         navigate,
         setSelectedExam,
         setIsSelectedExamFetching,
-        isQuestionFetchable
+        isQuestionFetchable,
+        user
       );
     });
 
@@ -96,8 +105,8 @@ const App: FC<AppProps> = () => {
       return;
     }
     fetchExamQuestionAPI(selectedExam)
-      .then(() => {
-        setIsQuestionFetchable(true);
+      .then((response) => {
+        response && setIsQuestionFetchable(true);
       })
       .catch(() => {
         setIsQuestionFetchable(false);
