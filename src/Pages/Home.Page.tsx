@@ -21,13 +21,13 @@ const HomePage: FC<HomePageProps> = ({}) => {
   const countDownFrom = getExamInstructionTimeStartedAt(selectedExam!);
   const navigate = useNavigate();
   const { allowedRoutes, setAllowedRoutes } = useContext(allowedRoutesContext);
+
   const handleCountDownFinished = useCallback(() => {
-    const currentAllowedRoutes = [...allowedRoutes].filter((route) => route !== ROUTE_HOMEPAGE);
+    const currentAllowedRoutes = allowedRoutes.filter((route) => route !== ROUTE_HOMEPAGE);
     currentAllowedRoutes.unshift(ROUTE_EXAM_INSTRUCTIONS);
     setAllowedRoutes(currentAllowedRoutes);
     navigate(ROUTE_EXAM_INSTRUCTIONS);
   }, []);
-
   //Skipped
   if (user?.status === "skipped") {
     return (

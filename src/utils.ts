@@ -134,7 +134,6 @@ export const handleAllowedRoutes = (
   isQuestionFetchable: boolean
 ) => {
   const newAllowedRoutes: string[] = [];
-  const currentRoute = window.location.pathname;
 
   if (!user) {
     newAllowedRoutes.push(ROUTE_LOGIN);

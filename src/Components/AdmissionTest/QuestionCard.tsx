@@ -33,6 +33,7 @@ const QuestionCard: FC<QuestioinCardProps> = ({ admissionQuestion, isSubmitting,
           <h2 className="font-bold">#{admissionQuestion.id}.</h2>
           <p>{admissionQuestion.questionText}</p>
         </div>
+
         <RadioGroup value={formik.values.userAnswer} onChange={async (value) => await formik.setValues({ userAnswer: value })}>
           <RadioGroup.Label className="sr-only">Server size</RadioGroup.Label>
           <div className="pb-2 space-y-2">
@@ -42,7 +43,7 @@ const QuestionCard: FC<QuestioinCardProps> = ({ admissionQuestion, isSubmitting,
                   key={option[0]}
                   value={option[0]}
                   className={({ active, checked }) =>
-                    `${active ? "ring-2 ring-offset-2 ring-offset-sky-300 ring-white ring-opacity-60" : ""}
+                    `${active ? "m-1 ring-2 ring-offset-2 ring-offset-sky-300 ring-white ring-opacity-60" : ""}
                   ${checked ? "bg-blue-900 bg-opacity-75 text-white" : "bg-white"}
                     relative rounded-lg shadow-md px-5 py-4 cursor-pointer flex focus:outline-none`
                   }

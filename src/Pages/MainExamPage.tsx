@@ -2,12 +2,14 @@ import { memo, FC, useState, useEffect, useCallback, useContext, useMemo } from 
 import { Navigate, useNavigate } from "react-router";
 import { fetchExamQuestionAPI, submitExamQuestionAPI } from "../APIs/exam.api";
 import QuestionCard from "../Components/AdmissionTest/QuestionCard";
-import { ROUTE_EXAM, ROUTE_HOMEPAGE } from "../constants.routes";
+import { ROUTE_EXAM, ROUTE_FORWARD_SLASH, ROUTE_HOMEPAGE } from "../constants.routes";
 import { allowedRoutesContext } from "../Contexts/allowedRoutes.context";
+import { isQuestionFetchableContext } from "../Contexts/isQuestionFetchable";
 import { selectedExamContext } from "../Contexts/selectedExam.context";
+import { userContext } from "../Contexts/user.contextt";
 import { useCountdown } from "../Hooks/Countdown";
 import { StudentAnswerOptions, StudentQuestion } from "../Models/StudentQuestion";
-import { getExamEndAt, isQuestionSubmitable } from "../utils";
+import { getExamEndAt, handleAllowedRoutes, isQuestionSubmitable } from "../utils";
 
 interface MainExamPageProps {}
 
@@ -22,8 +24,10 @@ const MainExamPage: FC<MainExamPageProps> = () => {
   const examEndAt = getExamEndAt(selectedExam!);
   const { allowedRoutes, setAllowedRoutes } = useContext(allowedRoutesContext);
   const navigate = useNavigate();
-
   const [isCoolDownVisible, setIsCoolDownVisible] = useState(false);
+  const { user } = useContext(userContext);
+  const { isQuestionFetchable, setIsQuestionFetchable } = useContext(isQuestionFetchableContext);
+
   const countDownValue = useMemo(() => {
     return admissionQuestions[0]?.submitableAfter || new Date();
   }, [isCoolDownVisible]);
@@ -37,7 +41,7 @@ const MainExamPage: FC<MainExamPageProps> = () => {
     currentAllowedRoutes.unshift(ROUTE_HOMEPAGE);
     setAllowedRoutes(currentAllowedRoutes);
     navigate(ROUTE_HOMEPAGE);
-  }, []);
+  }, [allowedRoutes]);
   const ExamEndAtCountDown = useCountdown(examEndAt, { onCountDownFinish: handleExamFinished });
 
   const handleRef = useCallback((node) => {
@@ -113,12 +117,15 @@ const MainExamPage: FC<MainExamPageProps> = () => {
       });
   }, []);
 
-  return !isFetching && admissionQuestions.length === 0 ? (
-    <Navigate to={ROUTE_HOMEPAGE} />
-  ) : (
+  if (!isFetching && admissionQuestions.length === 0) {
+    setIsQuestionFetchable(false);
+    handleAllowedRoutes(user, allowedRoutes, selectedExam, setAllowedRoutes, navigate, isQuestionFetchable);
+  }
+
+  return (
     <div className="flex items-center justify-center min-h-screen">
       <div className={`flex flex-col pt-12 relative`}>
-        <div className="flex justify-between absolute top-1 left-1 right-1">
+        <div className="absolute flex justify-between top-1 left-1 right-1">
           {isCoolDownVisible && <div className={`p-2 border border-red-500 text-red-500 rounded-md max-w-max flex-1`}>{coolDownTimer}</div>}
           <div className={`p-2 border border-indigo-500 text-indigo-500 rounded-md max-w-max ml-auto`}>{ExamEndAtCountDown}</div>
         </div>
