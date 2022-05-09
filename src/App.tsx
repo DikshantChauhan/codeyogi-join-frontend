@@ -1,4 +1,4 @@
-import { FC, memo, useEffect, useMemo, useState } from "react";
+import { FC, memo, useContext, useEffect, useState } from "react";
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import {
   ROUTE_DEBUG,
@@ -18,44 +18,26 @@ import DebugPage from "./Pages/Debug.Page";
 import { getMeDocRef, handleAuthChanges, handleMeChanges, isExamOver } from "./utils";
 import { onSnapshot } from "firebase/firestore";
 import ProtectedRoutes from "./Components/ProtectedRoutes";
-import { defaultUserContext, userContext } from "./Contexts/user.contextt";
-import { allowedRoutesContext, defaultAllowedRoutesContext } from "./Contexts/allowedRoutes.context";
-import { User } from "./Models/User";
 import SlotsPage from "./Pages/Slots.Page";
 import ExamInstructionsPage from "./Pages/ExamInstructions.Page";
 import MainExamPage from "./Pages/MainExamPage";
 import AppContainer from "./Components/AppContainer";
 import HomePage from "./Pages/Home.Page";
-import { selectedExamContext } from "./Contexts/selectedExam.context";
-import { Exam } from "./Models/Exam";
 import { fetchExamQuestionAPI, fetchSelectedExamAPI } from "./APIs/exam.api";
+import { userContext } from "./Contexts/user.contextt";
 import { isQuestionFetchableContext } from "./Contexts/isQuestionFetchable";
-
-export let userEnteredRoute = ROUTE_FORWARD_SLASH;
-export const setUserEnteredRoute = (route: string) => {
-  userEnteredRoute = route;
-};
-window.onload = () => {
-  setUserEnteredRoute(location.pathname);
-};
+import { selectedExamContext } from "./Contexts/selectedExam.context";
+import { allowedRoutesContext } from "./Contexts/allowedRoutes.context";
 
 interface AppProps {}
 
 const App: FC<AppProps> = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const userValue = useMemo(() => ({ user, setUser }), [user]);
-
-  const [allowedRoutes, setAllowedRoutes] = useState<string[]>(defaultAllowedRoutesContext.allowedRoutes);
-  const allowedRoutesValue = useMemo(() => ({ allowedRoutes, setAllowedRoutes }), [allowedRoutes]);
-
-  const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
-  const selectedExamValue = useMemo(() => ({ selectedExam, setSelectedExam }), [selectedExam]);
-
-  const [isQuestionFetchable, setIsQuestionFetchable] = useState(false);
-  const isQuestionFetchableValue = useMemo(() => ({ isQuestionFetchable, setIsQuestionFetchable }), [isQuestionFetchable]);
-
   const [isUserFetching, setIsUserFetching] = useState(true);
   const [isSelectedExamFetching, setIsSelectedExamFetching] = useState(true);
+  const { user, setUser } = useContext(userContext);
+  const { isQuestionFetchable, setIsQuestionFetchable } = useContext(isQuestionFetchableContext);
+  const { selectedExam, setSelectedExam } = useContext(selectedExamContext);
+  const { allowedRoutes, setAllowedRoutes } = useContext(allowedRoutesContext);
 
   const navigate = useNavigate();
 
@@ -122,35 +104,27 @@ const App: FC<AppProps> = () => {
   }
 
   return (
-    <userContext.Provider value={userValue}>
-      <allowedRoutesContext.Provider value={allowedRoutesValue}>
-        <selectedExamContext.Provider value={selectedExamValue}>
-          <isQuestionFetchableContext.Provider value={isQuestionFetchableValue}>
-            <Routes>
-              <Route path={ROUTE_FORWARD_SLASH} element={<ProtectedRoutes />}>
-                <Route path={ROUTE_LOGIN} element={<SignInPage />} />
+    <Routes>
+      <Route path={ROUTE_FORWARD_SLASH} element={<ProtectedRoutes />}>
+        <Route path={ROUTE_LOGIN} element={<SignInPage />} />
 
-                <Route path={ROUTE_EXAM} element={<MainExamPage />} />
+        <Route path={ROUTE_EXAM} element={<MainExamPage />} />
 
-                <Route element={<AppContainer />}>
-                  <Route path={ROUTE_HOMEPAGE} element={<HomePage />} />
+        <Route element={<AppContainer />}>
+          <Route path={ROUTE_HOMEPAGE} element={<HomePage />} />
 
-                  <Route path={ROUTE_PROFILE} element={<CompleteProfilePage />} />
+          <Route path={ROUTE_PROFILE} element={<CompleteProfilePage />} />
 
-                  <Route path={ROUTE_SLOTS} element={<SlotsPage />} />
+          <Route path={ROUTE_SLOTS} element={<SlotsPage />} />
 
-                  <Route path={ROUTE_EXAM_INSTRUCTIONS} element={<ExamInstructionsPage />} />
-                </Route>
-              </Route>
+          <Route path={ROUTE_EXAM_INSTRUCTIONS} element={<ExamInstructionsPage />} />
+        </Route>
+      </Route>
 
-              <Route path={ROUTE_DEBUG} element={<DebugPage />} />
+      <Route path={ROUTE_DEBUG} element={<DebugPage />} />
 
-              <Route path="*" element={<Navigate to={ROUTE_FORWARD_SLASH} />} />
-            </Routes>
-          </isQuestionFetchableContext.Provider>
-        </selectedExamContext.Provider>
-      </allowedRoutesContext.Provider>
-    </userContext.Provider>
+      <Route path="*" element={<Navigate to={ROUTE_FORWARD_SLASH} />} />
+    </Routes>
   );
 };
 

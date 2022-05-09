@@ -8,16 +8,7 @@ import { authentication, db } from "../firebase-config";
 import { meFetchAPI } from "./APIs/auth.api";
 import { EXAM_DURATION_IN_MINS, EXAM_INSTRUCTION_DURATION_IN_MINS } from "./APIs/base";
 import { fetchSelectedExamAPI } from "./APIs/exam.api";
-import { setUserEnteredRoute, userEnteredRoute } from "./App";
-import {
-  ROUTE_PROFILE,
-  ROUTE_SLOTS,
-  ROUTE_FORWARD_SLASH,
-  ROUTE_LOGIN,
-  ROUTE_HOMEPAGE,
-  ROUTE_EXAM_INSTRUCTIONS,
-  ROUTE_EXAM,
-} from "./constants.routes";
+import { ROUTE_PROFILE, ROUTE_SLOTS, ROUTE_LOGIN, ROUTE_HOMEPAGE, ROUTE_EXAM_INSTRUCTIONS, ROUTE_EXAM } from "./constants.routes";
 import { Exam } from "./Models/Exam";
 import { StudentQuestion } from "./Models/StudentQuestion";
 import { User } from "./Models/User";

@@ -3,10 +3,10 @@ import { Exam } from "../Models/Exam";
 
 export const defaultSelectedExamContext: {
   selectedExam: Exam | null;
-  setSelectedExam: (exam: Exam) => void;
+  setSelectedExam: (exam: Exam | null) => void;
 } = {
   selectedExam: null,
-  setSelectedExam: (exam: Exam) => {
+  setSelectedExam: (exam: Exam | null) => {
     defaultSelectedExamContext.selectedExam = exam;
   },
 };
