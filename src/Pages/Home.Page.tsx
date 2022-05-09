@@ -1,5 +1,5 @@
 import { format } from "date-fns/esm";
-import { memo, FC, useContext, useCallback } from "react";
+import { memo, FC, useContext, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import NoticeText from "../Components/NoticeText";
 import { ROUTE_EXAM_INSTRUCTIONS, ROUTE_HOMEPAGE, ROUTE_SLOTS } from "../constants.routes";
@@ -28,6 +28,7 @@ const HomePage: FC<HomePageProps> = ({}) => {
     setAllowedRoutes(currentAllowedRoutes);
     navigate(ROUTE_EXAM_INSTRUCTIONS);
   }, []);
+
   //Skipped
   if (user?.status === "skipped") {
     return (

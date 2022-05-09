@@ -35,7 +35,7 @@ const App: FC<AppProps> = () => {
   const [isUserFetching, setIsUserFetching] = useState(true);
   const [isSelectedExamFetching, setIsSelectedExamFetching] = useState(true);
   const { user, setUser } = useContext(userContext);
-  const { isQuestionFetchable, setIsQuestionFetchable } = useContext(isQuestionFetchableContext);
+  const { setIsQuestionFetchable } = useContext(isQuestionFetchableContext);
   const { selectedExam, setSelectedExam } = useContext(selectedExamContext);
   const { allowedRoutes, setAllowedRoutes } = useContext(allowedRoutesContext);
 
@@ -59,18 +59,7 @@ const App: FC<AppProps> = () => {
     if (!meDocRef) return;
 
     const unsubMeObserver = onSnapshot(meDocRef, async (doc) => {
-      await handleMeChanges(
-        doc,
-        setUser,
-        allowedRoutes,
-        selectedExam,
-        setAllowedRoutes,
-        navigate,
-        setSelectedExam,
-        setIsSelectedExamFetching,
-        isQuestionFetchable,
-        user
-      );
+      await handleMeChanges(doc, setUser, allowedRoutes, selectedExam, setAllowedRoutes, navigate, setSelectedExam, setIsSelectedExamFetching, user);
     });
 
     return unsubMeObserver;

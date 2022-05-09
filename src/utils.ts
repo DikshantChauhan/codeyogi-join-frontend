@@ -7,7 +7,7 @@ import { NavigateFunction } from "react-router-dom";
 import { authentication, db } from "../firebase-config";
 import { meFetchAPI } from "./APIs/auth.api";
 import { EXAM_DURATION_IN_MINS, EXAM_INSTRUCTION_DURATION_IN_MINS } from "./APIs/base";
-import { fetchSelectedExamAPI } from "./APIs/exam.api";
+import { fetchExamQuestionAPI, fetchSelectedExamAPI } from "./APIs/exam.api";
 import { ROUTE_PROFILE, ROUTE_SLOTS, ROUTE_LOGIN, ROUTE_HOMEPAGE, ROUTE_EXAM_INSTRUCTIONS, ROUTE_EXAM } from "./constants.routes";
 import { Exam } from "./Models/Exam";
 import { StudentQuestion } from "./Models/StudentQuestion";
@@ -116,13 +116,12 @@ export const handleAuthChanges = async (
   }
 };
 
-export const handleAllowedRoutes = (
+export const handleAllowedRoutes = async (
   user: User | null,
   currentAllowedRoutes: string[],
   selectedExam: Exam | null,
   setAllowedRoutes: (routes: string[]) => void,
-  navigate: NavigateFunction,
-  isQuestionFetchable: boolean
+  navigate: NavigateFunction
 ) => {
   const newAllowedRoutes: string[] = [];
 
@@ -138,9 +137,10 @@ export const handleAllowedRoutes = (
   } else if (user.status) {
     newAllowedRoutes.push(ROUTE_HOMEPAGE);
   } else if (selectedExam) {
+    const question = await fetchExamQuestionAPI(selectedExam);
     if (!hasExamInstructionTimeStarted(selectedExam)) {
       newAllowedRoutes.push(ROUTE_HOMEPAGE);
-    } else if (hasStudentFinishedExamEarly(isQuestionFetchable, selectedExam) || isExamOver(selectedExam)) {
+    } else if (hasStudentFinishedExamEarly(!!question, selectedExam) || isExamOver(selectedExam)) {
       newAllowedRoutes.push(ROUTE_HOMEPAGE);
     } else if (!user.exam_started_at) {
       newAllowedRoutes.push(ROUTE_EXAM_INSTRUCTIONS);
@@ -155,7 +155,7 @@ export const handleAllowedRoutes = (
     setAllowedRoutes(newAllowedRoutes);
     //console.log(newAllowedRoutes[0], " ", isExamOver(selectedExam!), " ", hasStudentFinishedExamEarly(isQuestionFetchable, selectedExam!));
 
-    navigate(newAllowedRoutes[0]);
+    newAllowedRoutes[0] && navigate(newAllowedRoutes[0]);
   }
 };
 
@@ -168,7 +168,6 @@ export const handleMeChanges = async (
   navigate: NavigateFunction,
   setSelectedExam: (user: Exam | null) => void,
   setIsSelectedExamFetching: (isLoadin: boolean) => void,
-  isQuestionFetchable: boolean,
   user: User | null
 ) => {
   let changedUser: User | null = null;
@@ -182,7 +181,7 @@ export const handleMeChanges = async (
       setSelectedExam(exam);
       setIsSelectedExamFetching(false);
       setUser(changedUser as User);
-      handleAllowedRoutes(changedUser, currentAllowedRoutes, selectedExam, setAllowedRoutes, navigate, isQuestionFetchable);
+      handleAllowedRoutes(changedUser, currentAllowedRoutes, selectedExam, setAllowedRoutes, navigate);
     }
   }
 };

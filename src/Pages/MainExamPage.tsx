@@ -26,7 +26,7 @@ const MainExamPage: FC<MainExamPageProps> = () => {
   const navigate = useNavigate();
   const [isCoolDownVisible, setIsCoolDownVisible] = useState(false);
   const { user } = useContext(userContext);
-  const { isQuestionFetchable, setIsQuestionFetchable } = useContext(isQuestionFetchableContext);
+  const { setIsQuestionFetchable } = useContext(isQuestionFetchableContext);
 
   const countDownValue = useMemo(() => {
     return admissionQuestions[0]?.submitableAfter || new Date();
@@ -119,7 +119,7 @@ const MainExamPage: FC<MainExamPageProps> = () => {
 
   if (!isFetching && admissionQuestions.length === 0) {
     setIsQuestionFetchable(false);
-    handleAllowedRoutes(user, allowedRoutes, selectedExam, setAllowedRoutes, navigate, isQuestionFetchable);
+    handleAllowedRoutes(user, allowedRoutes, selectedExam, setAllowedRoutes, navigate);
   }
 
   return (
